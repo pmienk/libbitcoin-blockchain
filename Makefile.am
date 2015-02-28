@@ -36,27 +36,23 @@ libbitcoin_blockchain_la_CPPFLAGS = \
 #
 # tests
 #
-#if WITH_TESTS
-#
-#TESTS = test/libbitcoin_blockchain_test
-#
-#check_PROGRAMS = test/libbitcoin_blockchain_test
-#
-#test_libbitcoin_blockchain_test_CPPFLAGS = \
-#    -I$(srcdir)/include \
-#    ${bitcoin_CFLAGS}
-#
-#test_libbitcoin_blockchain_test_SOURCES = \
-#    test/databases.cpp \
-#    test/disk_objs.cpp \
-#    test/htdb.cpp \
-#    test/interface.cpp \
-#    test/main.cpp
-#
-#test_libbitcoin_blockchain_test_LDADD = \
-#    libbitcoin-blockchain.la \
-#    -lleveldb \
-#    -lboost_unit_test_framework \
-#    ${bitcoin_LIBS}
-#
-#endif
+if WITH_TESTS
+
+TESTS = test/libbitcoin_blockchain_test
+
+check_PROGRAMS = test/libbitcoin_blockchain_test
+
+test_libbitcoin_blockchain_test_CPPFLAGS = \
+    -I$(srcdir)/include \
+    ${bitcoin_CFLAGS}
+
+test_libbitcoin_blockchain_test_SOURCES = \
+    test/binary_trie.cpp \
+    test/main.cpp
+
+test_libbitcoin_blockchain_test_LDADD = \
+    libbitcoin-blockchain.la \
+    -lboost_unit_test_framework \
+    ${bitcoin_LIBS}
+
+endif

@@ -22,30 +22,20 @@
 
 #include <bitcoin/bitcoin.hpp>
 
-// Logger defines.
-#define LOG_HSDB        "history_scan_database"
+// We use the generic helper definitions in libbitcoin to define BCB_API
+// and BCB_INTERNAL. BCB_API is used for the public API symbols. It either DLL
+// imports or DLL exports (or does nothing for static build) BCB_INTERNAL is
+// used for non-api symbols.
 
-// Uncomment this to enable hsdb debug logging.
-#define HSDB_DEBUG
-// Lowers read performance.
-#define SLAB_DEBUG_ASSERTS
-#define RECORD_DEBUG_ASSERTS
-
-// Now we use the generic helper definitions in libbitcoin to
-// define BCB_API and BCB_INTERNAL.
-// BCB_API is used for the public API symbols. It either DLL imports or
-// DLL exports (or does nothing for static build)
-// BCB_INTERNAL is used for non-api symbols.
-
-#if defined BCB_STATIC
-    #define BCB_API
-    #define BCB_INTERNAL
-#elif defined BCB_DLL
-    #define BCB_API      BC_HELPER_DLL_EXPORT
-    #define BCB_INTERNAL BC_HELPER_DLL_LOCAL
+#if defined BCC_STATIC
+#define BCB_API
+#define BCB_INTERNAL
+#elif defined BCC_DLL
+#define BCB_API      BC_HELPER_DLL_EXPORT
+#define BCB_INTERNAL BC_HELPER_DLL_LOCAL
 #else
-    #define BCB_API      BC_HELPER_DLL_IMPORT
-    #define BCB_INTERNAL BC_HELPER_DLL_LOCAL
+#define BCB_API      BC_HELPER_DLL_IMPORT
+#define BCB_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
 #endif
