@@ -81,7 +81,8 @@ test_libbitcoin_blockchain_test_SOURCES = \
     test/interface.cpp \
     test/main.cpp \
     test/transaction_pool.cpp \
-    test/validate_block.cpp
+    test/validate_block.cpp \
+    test/tree/red_black_tree.cpp
 
 endif WITH_TESTS
 
@@ -330,12 +331,25 @@ include_bitcoin_blockchain_impl_HEADERS = \
     include/bitcoin/blockchain/impl/multimap_records.ipp \
     include/bitcoin/blockchain/impl/remainder.ipp
 
+include_bitcoin_blockchain_impl_treedir = ${includedir}/bitcoin/blockchain/impl/tree
+include_bitcoin_blockchain_impl_tree_HEADERS = \
+    include/bitcoin/blockchain/impl/tree/red_black_node.ipp \
+    include/bitcoin/blockchain/impl/tree/red_black_store.ipp \
+    include/bitcoin/blockchain/impl/tree/red_black_tree.ipp
+
 include_bitcoin_blockchain_implementationdir = ${includedir}/bitcoin/blockchain/implementation
 include_bitcoin_blockchain_implementation_HEADERS = \
     include/bitcoin/blockchain/implementation/blockchain_impl.hpp \
     include/bitcoin/blockchain/implementation/organizer_impl.hpp \
     include/bitcoin/blockchain/implementation/simple_chain_impl.hpp \
     include/bitcoin/blockchain/implementation/validate_block_impl.hpp
+
+include_bitcoin_blockchain_treedir = ${includedir}/bitcoin/blockchain/tree
+include_bitcoin_blockchain_tree_HEADERS = \
+    include/bitcoin/blockchain/tree/key_value_store.hpp \
+    include/bitcoin/blockchain/tree/red_black_node.hpp \
+    include/bitcoin/blockchain/tree/red_black_store.hpp \
+    include/bitcoin/blockchain/tree/red_black_tree.hpp
 
 
 # Custom make targets.

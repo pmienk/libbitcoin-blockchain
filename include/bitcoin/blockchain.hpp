@@ -55,5 +55,9 @@
 #include <bitcoin/blockchain/implementation/organizer_impl.hpp>
 #include <bitcoin/blockchain/implementation/simple_chain_impl.hpp>
 #include <bitcoin/blockchain/implementation/validate_block_impl.hpp>
+#include <bitcoin/blockchain/tree/key_value_store.hpp>
+#include <bitcoin/blockchain/tree/red_black_node.hpp>
+#include <bitcoin/blockchain/tree/red_black_store.hpp>
+#include <bitcoin/blockchain/tree/red_black_tree.hpp>
 
 #endif
