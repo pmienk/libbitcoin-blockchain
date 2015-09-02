@@ -71,17 +71,33 @@ BOOST_AUTO_TEST_CASE(add_sequence_increasing)
     auto alpha = tree->create_node(15, false);
     auto beta = tree->create_node(20, false);
     auto gamma = tree->create_node(25, false);
+    auto delta = tree->create_node(30, false);
+    auto eta = tree->create_node(35, false);
+    auto theta = tree->create_node(40, false);
+    auto iota = tree->create_node(45, false);
 
     tree->add(alpha);
     tree->add(beta);
     tree->add(gamma);
+    tree->add(delta);
+    tree->add(eta);
+    tree->add(theta);
+    tree->add(iota);
 
-    BOOST_REQUIRE(tree->root() == beta);
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(delta->left == beta);
+    BOOST_REQUIRE(delta->right == theta);
     BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(alpha->is_red == false);
-    BOOST_REQUIRE(beta->is_red == true);
-    BOOST_REQUIRE(gamma->is_red == true);
+    BOOST_REQUIRE(theta->left == eta);
+    BOOST_REQUIRE(theta->right == iota);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!iota->is_red);
 }
 
 BOOST_AUTO_TEST_CASE(add_sequence_decreasing)
@@ -92,17 +108,70 @@ BOOST_AUTO_TEST_CASE(add_sequence_decreasing)
     auto alpha = tree->create_node(15, false);
     auto beta = tree->create_node(20, false);
     auto gamma = tree->create_node(25, false);
+    auto delta = tree->create_node(30, false);
+    auto eta = tree->create_node(35, false);
+    auto theta = tree->create_node(40, false);
+    auto iota = tree->create_node(45, false);
 
+    tree->add(iota);
+    tree->add(theta);
+    tree->add(eta);
+    tree->add(delta);
     tree->add(gamma);
     tree->add(beta);
     tree->add(alpha);
 
-    BOOST_REQUIRE(tree->root() == beta);
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(delta->left == beta);
+    BOOST_REQUIRE(delta->right == theta);
     BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(alpha->is_red == false);
-    BOOST_REQUIRE(beta->is_red == true);
-    BOOST_REQUIRE(gamma->is_red == true);
+    BOOST_REQUIRE(theta->left == eta);
+    BOOST_REQUIRE(theta->right == iota);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!iota->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(add_sequence_alternating)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(15, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma = tree->create_node(25, false);
+    auto delta = tree->create_node(30, false);
+    auto eta = tree->create_node(35, false);
+    auto theta = tree->create_node(40, false);
+    auto iota = tree->create_node(45, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(theta);
+    tree->add(beta);
+    tree->add(eta);
+    tree->add(gamma);
+    tree->add(delta);
+
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(delta->left == beta);
+    BOOST_REQUIRE(delta->right == theta);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == gamma);
+    BOOST_REQUIRE(theta->left == eta);
+    BOOST_REQUIRE(theta->right == iota);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!iota->is_red);
 }
 
 //
