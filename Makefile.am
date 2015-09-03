@@ -82,6 +82,7 @@ test_libbitcoin_blockchain_test_SOURCES = \
     test/main.cpp \
     test/transaction_pool.cpp \
     test/validate_block.cpp \
+    test/tree/red_black_store.cpp \
     test/tree/red_black_tree.cpp
 
 endif WITH_TESTS

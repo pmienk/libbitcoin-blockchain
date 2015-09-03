@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(add_existing_key_replace_success)
 {
     auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
 
-    BOOST_REQUIRE_EQUAL(false, store->add(25, 123, true));
+    BOOST_REQUIRE_EQUAL(true, store->add(25, 123, true));
 }
 
 //
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(remove_existing_key_success)
 {
     auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
 
-    BOOST_REQUIRE_EQUAL(false, store->remove(25));
+    BOOST_REQUIRE_EQUAL(true, store->remove(25));
 }
 
 //
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(remove_existing_key_success)
 //
 BOOST_AUTO_TEST_CASE(retrieve_nonexisting_key_failure)
 {
-    auto store = std::make_shared<red_black_store<int, bool>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
 
     auto result = store->retrieve(22);
 
@@ -127,9 +127,9 @@ BOOST_AUTO_TEST_CASE(retrieve_nonexisting_key_failure)
 
 BOOST_AUTO_TEST_CASE(retrieve_existing_key_success)
 {
-    auto store = std::make_shared<red_black_store<int, bool>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
 
-    BOOST_REQUIRE_EQUAL(false, store->add(25, 87545, true));
+    BOOST_REQUIRE_EQUAL(true, store->add(25, 87545, true));
 
     auto result = store->retrieve(25);
 

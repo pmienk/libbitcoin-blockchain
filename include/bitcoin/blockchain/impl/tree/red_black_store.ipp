@@ -74,7 +74,7 @@ bool red_black_store<Key, Value, Comparer, Allocator>::remove(key_type key)
     if (node != tree_->nil())
     {
         tree_->remove(node);
-        tree_->destroy(node);
+        tree_->destroy_node(node);
         result = true;
     }
 
@@ -87,7 +87,7 @@ typename red_black_store<Key, Value, Comparer, Allocator>::pair_value_bool
 {
     auto node = tree_->retrieve(key);
 
-    return std::make_pair((node != tree_->nil()) ? node->key : key_type(),
+    return std::make_pair((node != tree_->nil()) ? node->value : value_type(),
         (node != tree_->nil()));
 }
 

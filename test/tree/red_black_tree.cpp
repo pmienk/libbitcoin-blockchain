@@ -25,6 +25,49 @@
 using namespace bc;
 using namespace bc::blockchain;
 
+static void print_tree(std::shared_ptr<red_black_tree<int, bool>> tree)
+{
+    std::cout << "----- begin tree -----" << std::endl;
+
+    std::stack<std::tuple<const red_black_node<int, bool>*, int, bool>> queue;
+
+    if (tree->root() != tree->nil())
+        queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(tree->root(), 0, false));
+
+    while (!queue.empty())
+    {
+        auto current = queue.top();
+        queue.pop();
+
+        auto node = std::get<0>(current);
+        auto depth = std::get<1>(current);
+        bool is_left_child = std::get<2>(current);
+
+        if (node->left != tree->nil())
+            queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(node->left, depth + 1, true));
+
+        if (node->right != tree->nil())
+            queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(node->right, depth + 1, false));
+
+        if (depth > 0)
+        {
+            for (int i = 0; i < depth; i++)
+                std::cout << ">";
+
+            if (is_left_child) { std::cout << "l" << depth << ": "; }
+            else { std::cout << "r" << depth << ": "; }
+
+            std::cout << node->key << ", color: " << node->is_red << std::endl;
+        }
+        else
+        {
+            std::cout << "root: " << node->key << ", color: " << node->is_red << std::endl;
+        }
+    }
+
+    std::cout << "----- end tree -----" << std::endl;
+}
+
 BOOST_AUTO_TEST_SUITE(red_black_tree_tests)
 
 //
@@ -84,20 +127,20 @@ BOOST_AUTO_TEST_CASE(add_sequence_increasing)
     tree->add(theta);
     tree->add(iota);
 
-    BOOST_REQUIRE(tree->root() == delta);
-    BOOST_REQUIRE(delta->left == beta);
-    BOOST_REQUIRE(delta->right == theta);
+    BOOST_REQUIRE(tree->root() == beta);
     BOOST_REQUIRE(beta->left == alpha);
-    BOOST_REQUIRE(beta->right == gamma);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(delta->right == theta);
     BOOST_REQUIRE(theta->left == eta);
     BOOST_REQUIRE(theta->right == iota);
-    BOOST_REQUIRE(!delta->is_red);
-    BOOST_REQUIRE(beta->is_red);
-    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!beta->is_red);
     BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(delta->is_red);
     BOOST_REQUIRE(!gamma->is_red);
-    BOOST_REQUIRE(!eta->is_red);
-    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(eta->is_red);
+    BOOST_REQUIRE(iota->is_red);
 }
 
 BOOST_AUTO_TEST_CASE(add_sequence_decreasing)
@@ -121,20 +164,21 @@ BOOST_AUTO_TEST_CASE(add_sequence_decreasing)
     tree->add(beta);
     tree->add(alpha);
 
-    BOOST_REQUIRE(tree->root() == delta);
-    BOOST_REQUIRE(delta->left == beta);
-    BOOST_REQUIRE(delta->right == theta);
-    BOOST_REQUIRE(beta->left == alpha);
-    BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(theta->left == eta);
+    BOOST_REQUIRE(tree->root() == theta);
     BOOST_REQUIRE(theta->right == iota);
-    BOOST_REQUIRE(!delta->is_red);
-    BOOST_REQUIRE(beta->is_red);
-    BOOST_REQUIRE(theta->is_red);
-    BOOST_REQUIRE(!alpha->is_red);
-    BOOST_REQUIRE(!gamma->is_red);
-    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(theta->left == delta);
+    BOOST_REQUIRE(delta->right == eta);
+    BOOST_REQUIRE(delta->left == beta);
+    BOOST_REQUIRE(beta->right == gamma);
+    BOOST_REQUIRE(beta->left == alpha);
+
+    BOOST_REQUIRE(!theta->is_red);
     BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(alpha->is_red);
+    BOOST_REQUIRE(gamma->is_red);
 }
 
 BOOST_AUTO_TEST_CASE(add_sequence_alternating)
@@ -158,20 +202,20 @@ BOOST_AUTO_TEST_CASE(add_sequence_alternating)
     tree->add(gamma);
     tree->add(delta);
 
-    BOOST_REQUIRE(tree->root() == delta);
-    BOOST_REQUIRE(delta->left == beta);
-    BOOST_REQUIRE(delta->right == theta);
-    BOOST_REQUIRE(beta->left == alpha);
-    BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(theta->left == eta);
+    BOOST_REQUIRE(tree->root() == theta);
+    BOOST_REQUIRE(theta->left == beta);
     BOOST_REQUIRE(theta->right == iota);
-    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(delta->right == eta);
+    BOOST_REQUIRE(!theta->is_red);
     BOOST_REQUIRE(beta->is_red);
-    BOOST_REQUIRE(theta->is_red);
-    BOOST_REQUIRE(!alpha->is_red);
-    BOOST_REQUIRE(!gamma->is_red);
-    BOOST_REQUIRE(!eta->is_red);
     BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(eta->is_red);
+    BOOST_REQUIRE(gamma->is_red);
 }
 
 //
@@ -219,15 +263,17 @@ BOOST_AUTO_TEST_CASE(remove_root_from_three_node_tree)
     BOOST_REQUIRE(tree->root() == beta);
     BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(alpha->is_red == false);
-    BOOST_REQUIRE(beta->is_red == true);
+    BOOST_REQUIRE(alpha->is_red == true);
+    BOOST_REQUIRE(beta->is_red == false);
     BOOST_REQUIRE(gamma->is_red == true);
 
     tree->remove(beta);
 
-    BOOST_REQUIRE(tree->root() == alpha);
-    BOOST_REQUIRE(alpha->left == tree->nil());
-    BOOST_REQUIRE(alpha->right == gamma);
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(gamma->left == alpha);
+    BOOST_REQUIRE(gamma->right == tree->nil());
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(alpha->is_red);
 
     tree->destroy_node(beta);
     beta = nullptr;
@@ -262,8 +308,8 @@ BOOST_AUTO_TEST_CASE(retrieve_from_nonempty_tree)
     BOOST_REQUIRE(tree->root() == beta);
     BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(alpha->is_red == false);
-    BOOST_REQUIRE(beta->is_red == true);
+    BOOST_REQUIRE(alpha->is_red == true);
+    BOOST_REQUIRE(beta->is_red == false);
     BOOST_REQUIRE(gamma->is_red == true);
 
     BOOST_REQUIRE(tree->retrieve(10) == tree->nil());

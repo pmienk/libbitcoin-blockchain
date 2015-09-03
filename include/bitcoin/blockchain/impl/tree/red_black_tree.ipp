@@ -219,8 +219,9 @@ typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     {
         bool a_compare_b = comparer_(key, current->key);
         bool b_compare_a = comparer_(current->key, key);
+        bool equal = (a_compare_b && b_compare_a) || (!a_compare_b && !b_compare_a);
 
-        if (a_compare_b && b_compare_a)
+        if (equal)
             break;
         else if (a_compare_b)
             current = current->left;
@@ -237,9 +238,9 @@ void red_black_tree<Key, Value, Comparer, Allocator>::balance_add(
 {
     while (node->parent->is_red)
     {
-        bool is_right_sibling = (node->parent == node->parent->parent->right);
+        bool is_parent_left_sibling = (node->parent == node->parent->parent->left);
 
-        node_type* parent_sibling = is_right_sibling ?
+        node_type* parent_sibling = is_parent_left_sibling ?
             node->parent->parent->right : node->parent->parent->left;
 
         if (parent_sibling->is_red)
@@ -251,24 +252,24 @@ void red_black_tree<Key, Value, Comparer, Allocator>::balance_add(
         }
         else
         {
-            if ((!is_right_sibling && (node == node->parent->right)) ||
-                (is_right_sibling && (node == node->parent->left)))
+            if ((is_parent_left_sibling && (node == node->parent->right)) ||
+                (!is_parent_left_sibling && (node == node->parent->left)))
             {
                 node = node->parent;
 
-                if (is_right_sibling)
-                    rotate_right(node);
-                else
+                if (is_parent_left_sibling)
                     rotate_left(node);
+                else
+                    rotate_right(node);
             }
 
             node->parent->is_red = false;
             node->parent->parent->is_red = true;
 
-            if (is_right_sibling)
-                rotate_left(node->parent->parent);
-            else
+            if (is_parent_left_sibling)
                 rotate_right(node->parent->parent);
+            else
+                rotate_left(node->parent->parent);
         }
     }
 
@@ -395,7 +396,7 @@ typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::tree_minimum(
         node_type* node)
 {
-    auto last = nil_;
+    auto last = node;
     auto current = node;
 
     if (current != nil_)
