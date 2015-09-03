@@ -284,73 +284,69 @@ void red_black_tree<Key, Value, Comparer, Allocator>::balance_remove(
 
     while ((node != root_) && !node->is_red)
     {
-        if (current == current->parent->left)
-        {
-            auto sibling = current->parent->right;
+        bool is_current_left_sibling = (current == current->parent->left);
 
-            if (sibling->is_red)
+        auto sibling = is_current_left_sibling ?
+            current->parent->right : current->parent->left;
+
+        if (sibling->is_red)
+        {
+            sibling->is_red = false;
+            current->parent->is_red = true;
+
+            if (is_current_left_sibling)
             {
-                sibling->is_red = false;
-                current->parent->is_red = true;
                 rotate_left(current->parent);
                 sibling = current->parent->right;
             }
-
-            if (!sibling->left->is_red && !sibling->right->is_red)
-            {
-                sibling->is_red = true;
-                current = current->parent;
-            }
             else
             {
-                if (!sibling->right->is_red)
-                {
-                    sibling->left->is_red = false;
-                    sibling->is_red = true;
-                    rotate_right(sibling);
-                    sibling = current->parent->right;
-                }
-
-                sibling->is_red = current->parent->is_red;
-                current->parent->is_red = false;
-                sibling->right->is_red = false;
-                rotate_left(current->parent);
-                current = root_;
-            }
-        }
-        else
-        {
-            auto sibling = current->parent->left;
-
-            if (sibling->is_red)
-            {
-                sibling->is_red = false;
-                current->parent->is_red = true;
                 rotate_right(current->parent);
                 sibling = current->parent->left;
             }
+        }
 
-            if (!sibling->left->is_red && !sibling->right->is_red)
+        if (!sibling->left->is_red && !sibling->right->is_red)
+        {
+            sibling->is_red = true;
+            current = current->parent;
+        }
+        else
+        {
+            if ((is_current_left_sibling && !sibling->right->is_red) ||
+                (!is_current_left_sibling && !sibling->left->is_red))
             {
                 sibling->is_red = true;
-                current = current->parent;
-            }
-            else
-            {
-                if (!sibling->left->is_red)
+
+                if (is_current_left_sibling)
+                {
+                    sibling->left->is_red = false;
+                    rotate_right(sibling);
+                    sibling = current->parent->right;
+                }
+                else
                 {
                     sibling->right->is_red = false;
-                    sibling->is_red = true;
                     rotate_left(sibling);
                     sibling = current->parent->left;
                 }
+            }
 
-                sibling->is_red = current->parent->is_red;
-                current->parent->is_red = false;
+            sibling->is_red = current->parent->is_red;
+            current->parent->is_red = false;
+
+            if (is_current_left_sibling)
+            {
+                sibling->right->is_red = false;
+                rotate_left(current->parent);
+            }
+            else
+            {
                 sibling->left->is_red = false;
                 rotate_right(current->parent);
-                current = root_;
             }
+
+            current = root_;
         }
     }
 

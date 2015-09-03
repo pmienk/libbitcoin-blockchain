@@ -43,16 +43,16 @@ static void print_tree(std::shared_ptr<red_black_tree<int, bool>> tree)
         auto depth = std::get<1>(current);
         bool is_left_child = std::get<2>(current);
 
-        if (node->left != tree->nil())
-            queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(node->left, depth + 1, true));
-
         if (node->right != tree->nil())
             queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(node->right, depth + 1, false));
+
+        if (node->left != tree->nil())
+            queue.push(std::make_tuple<const red_black_node<int, bool>*, int, bool>(node->left, depth + 1, true));
 
         if (depth > 0)
         {
             for (int i = 0; i < depth; i++)
-                std::cout << ">";
+                std::cout << ">>>>";
 
             if (is_left_child) { std::cout << "l" << depth << ": "; }
             else { std::cout << "r" << depth << ": "; }
@@ -216,6 +216,136 @@ BOOST_AUTO_TEST_CASE(add_sequence_alternating)
     BOOST_REQUIRE(!delta->is_red);
     BOOST_REQUIRE(eta->is_red);
     BOOST_REQUIRE(gamma->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(add_textbook_example)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == iota);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(iota->left == beta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    auto gamma= tree->create_node(4, false);
+    tree->add(gamma);
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == iota);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(iota->left == theta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(add_textbook_example_mirror)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto gamma= tree->create_node(4, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(gamma);
+    tree->add(lambda);
+    tree->add(beta);
+    tree->add(kappa);
+    tree->add(theta);
+    tree->add(alpha);
+    tree->add(eta);
+    tree->add(delta);
+
+    print_tree(tree);
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == kappa);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(alpha->is_red);
+    BOOST_REQUIRE(kappa->is_red);
+    BOOST_REQUIRE(kappa->left == eta);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
+
+    tree->add(iota);
+
+    print_tree(tree);
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == gamma);
+    BOOST_REQUIRE(eta->right == kappa);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(kappa->is_red);
+    BOOST_REQUIRE(kappa->left == theta);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(theta->right == iota);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
 }
 
 //
