@@ -305,8 +305,6 @@ BOOST_AUTO_TEST_CASE(add_textbook_example_mirror)
     tree->add(eta);
     tree->add(delta);
 
-    print_tree(tree);
-
     BOOST_REQUIRE(tree->root() == gamma);
     BOOST_REQUIRE(!gamma->is_red);
     BOOST_REQUIRE(gamma->left == beta);
@@ -325,8 +323,6 @@ BOOST_AUTO_TEST_CASE(add_textbook_example_mirror)
     BOOST_REQUIRE(!lambda->is_red);
 
     tree->add(iota);
-
-    print_tree(tree);
 
     BOOST_REQUIRE(tree->root() == eta);
     BOOST_REQUIRE(!eta->is_red);
@@ -351,62 +347,590 @@ BOOST_AUTO_TEST_CASE(add_textbook_example_mirror)
 //
 // remove tests
 //
-BOOST_AUTO_TEST_CASE(remove_exclusive_node)
+BOOST_AUTO_TEST_CASE(remove_node_missing_left_child)
 {
     std::allocator<red_black_node<int, bool>> allocator;
     auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
 
-    auto node = tree->create_node(15, false);
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
 
-    BOOST_REQUIRE(node->is_red == true);
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
 
-    tree->add(node);
+    BOOST_REQUIRE(tree->root() == iota);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(iota->left == beta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
 
-    BOOST_REQUIRE(tree->root() == node);
-    BOOST_REQUIRE(tree->nil() != node);
-    BOOST_REQUIRE(node->is_red == false);
-    BOOST_REQUIRE(node->key == 15);
-    BOOST_REQUIRE(node->value == false);
+    tree->remove(kappa);
+    tree->destroy_node(kappa);
+    kappa = nullptr;
 
-    tree->remove(node);
-
-    BOOST_REQUIRE(tree->root() == tree->nil());
-    BOOST_REQUIRE(tree->root() != node);
-
-    tree->destroy_node(node);
-    node = nullptr;
+    BOOST_REQUIRE(tree->root() == iota);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(iota->left == beta);
+    BOOST_REQUIRE(iota->right == lambda);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
 }
 
-BOOST_AUTO_TEST_CASE(remove_root_from_three_node_tree)
+BOOST_AUTO_TEST_CASE(remove_node_missing_right_child)
 {
     std::allocator<red_black_node<int, bool>> allocator;
     auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
 
-    auto alpha = tree->create_node(15, false);
-    auto beta = tree->create_node(20, false);
-    auto gamma = tree->create_node(25, false);
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto gamma = tree->create_node(4, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
 
+    tree->add(iota);
     tree->add(alpha);
+    tree->add(kappa);
     tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
     tree->add(gamma);
 
-    BOOST_REQUIRE(tree->root() == beta);
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == iota);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(iota->left == theta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    tree->remove(delta);
+    tree->destroy_node(delta);
+    delta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == iota);
+    BOOST_REQUIRE(beta->is_red);
     BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(beta->right == gamma);
-    BOOST_REQUIRE(alpha->is_red == true);
-    BOOST_REQUIRE(beta->is_red == false);
-    BOOST_REQUIRE(gamma->is_red == true);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(iota->left == theta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+}
 
-    tree->remove(beta);
+BOOST_AUTO_TEST_CASE(remove_node_has_both_children_subtree_minimum_immediate_child)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto gamma = tree->create_node(4, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
+    tree->add(gamma);
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == iota);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(iota->left == theta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    tree->remove(iota);
+    tree->destroy_node(iota);
+    iota = nullptr;
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(kappa->is_red);
+    BOOST_REQUIRE(kappa->left == theta);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_has_both_children_subtree_minimum_grandchild)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto gamma = tree->create_node(4, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
+    tree->add(gamma);
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == iota);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(iota->left == theta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    tree->remove(eta);
+    tree->destroy_node(eta);
+    eta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == theta);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(theta->left == beta);
+    BOOST_REQUIRE(theta->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(kappa->is_red);
+    BOOST_REQUIRE(kappa->left == iota);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_u_or_v_red)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(10, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma = tree->create_node(30, false);
+    auto delta = tree->create_node(40, false);
+
+    tree->add(gamma);
+    tree->add(delta);
+    tree->add(beta);
+    tree->add(alpha);
 
     BOOST_REQUIRE(tree->root() == gamma);
-    BOOST_REQUIRE(gamma->left == alpha);
-    BOOST_REQUIRE(gamma->right == tree->nil());
     BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
     BOOST_REQUIRE(alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
 
+    tree->remove(beta);
     tree->destroy_node(beta);
     beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == alpha);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_case_left_right)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(10, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma = tree->create_node(30, false);
+    auto delta = tree->create_node(40, false);
+    auto eta = tree->create_node(25, false);
+
+    tree->add(gamma);
+    tree->add(delta);
+    tree->add(beta);
+    tree->add(alpha);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->add(eta);
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(eta->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+
+    tree->remove(delta);
+    tree->destroy_node(delta);
+    delta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == beta);
+    BOOST_REQUIRE(eta->right == gamma);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(!gamma->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_case_right_left)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(10, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma = tree->create_node(30, false);
+    auto delta = tree->create_node(40, false);
+    auto theta = tree->create_node(35, false);
+
+    tree->add(gamma);
+    tree->add(delta);
+    tree->add(beta);
+    tree->add(alpha);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == theta);
+    BOOST_REQUIRE(theta->is_red);
+
+    tree->remove(beta);
+    tree->destroy_node(beta);
+    beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == theta);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(theta->left == gamma);
+    BOOST_REQUIRE(theta->right == delta);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_case_left_left)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(50, false);
+    auto beta = tree->create_node(40, false);
+    auto gamma = tree->create_node(35, false);
+    auto theta = tree->create_node(30, false);
+    auto delta = tree->create_node(20, false);
+    auto eta = tree->create_node(10, false);
+
+    tree->add(gamma);
+    tree->add(delta);
+    tree->add(beta);
+    tree->add(alpha);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->add(eta);
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->right == beta);
+    BOOST_REQUIRE(gamma->left == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->right == theta);
+    BOOST_REQUIRE(delta->left == eta);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(eta->is_red);
+
+    tree->remove(beta);
+    tree->destroy_node(beta);
+    beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->right == gamma);
+    BOOST_REQUIRE(delta->left == eta);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == theta);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_node_case_right_right)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(10, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma = tree->create_node(30, false);
+    auto delta = tree->create_node(40, false);
+    auto eta = tree->create_node(50, false);
+    auto theta = tree->create_node(35, false);
+
+    tree->add(gamma);
+    tree->add(delta);
+    tree->add(beta);
+    tree->add(alpha);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->add(eta);
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == theta);
+    BOOST_REQUIRE(delta->right == eta);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(eta->is_red);
+
+    tree->remove(beta);
+    tree->destroy_node(beta);
+    beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(delta->right == eta);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->right == theta);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_sibling_red_case_left)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(40, false);
+    auto beta = tree->create_node(35, false);
+    auto gamma = tree->create_node(30, false);
+    auto eta = tree->create_node(25, false);
+    auto delta = tree->create_node(20, false);
+    auto theta = tree->create_node(10, false);
+    auto iota = tree->create_node(5, false);
+
+    tree->add(gamma);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(alpha);
+    tree->add(eta);
+    tree->add(theta);
+    tree->add(iota);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->remove(iota);
+    tree->destroy_node(iota);
+    iota = nullptr;
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->right == beta);
+    BOOST_REQUIRE(gamma->left == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(delta->right == eta);
+    BOOST_REQUIRE(delta->left == theta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!theta->is_red);
+
+    tree->remove(beta);
+    tree->destroy_node(beta);
+    beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->right == gamma);
+    BOOST_REQUIRE(delta->left == theta);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == eta);
+    BOOST_REQUIRE(eta->is_red);
+    BOOST_REQUIRE(!theta->is_red);
+}
+
+BOOST_AUTO_TEST_CASE(remove_sibling_red_case_right)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(5, false);
+    auto beta = tree->create_node(10, false);
+    auto gamma = tree->create_node(20, false);
+    auto delta = tree->create_node(30, false);
+    auto eta = tree->create_node(25, false);
+    auto theta = tree->create_node(35, false);
+    auto iota = tree->create_node(40, false);
+
+    tree->add(gamma);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(alpha);
+    tree->add(eta);
+    tree->add(theta);
+    tree->add(iota);
+
+    tree->remove(alpha);
+    tree->destroy_node(alpha);
+    alpha = nullptr;
+
+    tree->remove(iota);
+    tree->destroy_node(iota);
+    iota = nullptr;
+
+    BOOST_REQUIRE(tree->root() == gamma);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(delta->left == eta);
+    BOOST_REQUIRE(delta->right == theta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(!theta->is_red);
+
+    tree->remove(beta);
+    tree->destroy_node(beta);
+    beta = nullptr;
+
+    BOOST_REQUIRE(tree->root() == delta);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(delta->left == gamma);
+    BOOST_REQUIRE(delta->right == theta);
+    BOOST_REQUIRE(!gamma->is_red);
+    BOOST_REQUIRE(gamma->right == eta);
+    BOOST_REQUIRE(eta->is_red);
+    BOOST_REQUIRE(!theta->is_red);
 }
 
 //

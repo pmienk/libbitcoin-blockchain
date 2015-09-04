@@ -190,7 +190,9 @@ void red_black_tree<Key, Value, Comparer, Allocator>::remove(
         replacement = potential_violator->right;
 
         if (potential_violator->parent == node)
+        {
             replacement->parent = potential_violator;
+        }
         else
         {
             transplant(potential_violator, potential_violator->right);
@@ -282,7 +284,7 @@ void red_black_tree<Key, Value, Comparer, Allocator>::balance_remove(
 {
     auto current = node;
 
-    while ((node != root_) && !node->is_red)
+    while ((current != root_) && !current->is_red)
     {
         bool is_current_left_sibling = (current == current->parent->left);
 
@@ -392,19 +394,12 @@ typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::tree_minimum(
         node_type* node)
 {
-    auto last = node;
     auto current = node;
 
-    if (current != nil_)
-    {
-        while (current->left != nil_)
-        {
-            last = current;
-            current = current->left;
-        }
-    }
+    while (current->left != nil_)
+        current = current->left;
 
-    return last;
+    return current;
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
