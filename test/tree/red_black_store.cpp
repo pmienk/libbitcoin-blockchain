@@ -25,17 +25,19 @@
 using namespace bc;
 using namespace bc::blockchain;
 
-static std::shared_ptr<red_black_tree<int, int, std::less<int>,
+template <typename Comparer>
+static std::shared_ptr<red_black_tree<int, int, Comparer,
     std::allocator<red_black_node<int, int>>>> get_tree()
 {
     std::allocator<red_black_node<int, int>> allocator;
-    return std::make_shared<red_black_tree<int, int>>(allocator);
+    return std::make_shared<red_black_tree<int, int, Comparer>>(allocator);
 }
 
-static std::shared_ptr<red_black_tree<int, int, std::less<int>,
+template <typename Comparer>
+static std::shared_ptr<red_black_tree<int, int, Comparer,
     std::allocator<red_black_node<int, int>>>> get_populated_tree()
 {
-    auto tree = get_tree();
+    auto tree = get_tree<Comparer>();
 
     tree->add(tree->create_node(15, 1));
     tree->add(tree->create_node(20, 2));
@@ -65,7 +67,7 @@ BOOST_AUTO_TEST_CASE(constructor_allocator_arg)
 
 BOOST_AUTO_TEST_CASE(constructor_tree_arg)
 {
-    auto store = new red_black_store<int, int>(get_tree());
+    auto store = new red_black_store<int, int, std::greater<int>>(get_tree<std::greater<int>>());
 
     delete store;
 
@@ -77,21 +79,24 @@ BOOST_AUTO_TEST_CASE(constructor_tree_arg)
 //
 BOOST_AUTO_TEST_CASE(add_new_key_success)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(true, store->add(23, 17, false));
 }
 
 BOOST_AUTO_TEST_CASE(add_existing_key_no_replace_failure)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(false, store->add(25, 100, false));
 }
 
 BOOST_AUTO_TEST_CASE(add_existing_key_replace_success)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(true, store->add(25, 123, true));
 }
@@ -101,14 +106,16 @@ BOOST_AUTO_TEST_CASE(add_existing_key_replace_success)
 //
 BOOST_AUTO_TEST_CASE(remove_nonexistent_key_failure)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(false, store->remove(22));
 }
 
 BOOST_AUTO_TEST_CASE(remove_existing_key_success)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(true, store->remove(25));
 }
@@ -118,7 +125,8 @@ BOOST_AUTO_TEST_CASE(remove_existing_key_success)
 //
 BOOST_AUTO_TEST_CASE(retrieve_nonexisting_key_failure)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     auto result = store->retrieve(22);
 
@@ -127,7 +135,8 @@ BOOST_AUTO_TEST_CASE(retrieve_nonexisting_key_failure)
 
 BOOST_AUTO_TEST_CASE(retrieve_existing_key_success)
 {
-    auto store = std::make_shared<red_black_store<int, int>>(get_populated_tree());
+    auto store = std::make_shared<red_black_store<int, int, std::greater<int>>>(
+        get_populated_tree<std::greater<int>>());
 
     BOOST_REQUIRE_EQUAL(true, store->add(25, 87545, true));
 

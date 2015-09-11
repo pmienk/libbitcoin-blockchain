@@ -31,7 +31,7 @@ namespace blockchain {
 
 template<typename Key,
     typename Value,
-    typename Comparer = std::less<Key>,
+    typename Comparer = std::greater<Key>,
     typename Allocator = std::allocator<red_black_node<Key, Value>>>
 class red_black_store : public key_value_store<Key, Value, Comparer>,
     private boost::noncopyable

@@ -25,7 +25,8 @@
 using namespace bc;
 using namespace bc::blockchain;
 
-static void print_tree(std::shared_ptr<red_black_tree<int, bool>> tree)
+template <typename Comparer>
+static void print_tree(std::shared_ptr<red_black_tree<int, bool, Comparer>> tree)
 {
     std::cout << "----- begin tree -----" << std::endl;
 
@@ -970,6 +971,86 @@ BOOST_AUTO_TEST_CASE(retrieve_from_nonempty_tree)
     BOOST_REQUIRE(tree->retrieve(15) == alpha);
     BOOST_REQUIRE(tree->retrieve(20) == beta);
     BOOST_REQUIRE(tree->retrieve(25) == gamma);
+}
+
+//
+// retrieve_greater_equal tests
+//
+BOOST_AUTO_TEST_CASE(retrieve_greater_equal_from_empty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto result = tree->retrieve_greater_equal(15);
+
+    BOOST_REQUIRE(tree->nil() == result);
+}
+
+BOOST_AUTO_TEST_CASE(retrieve_greater_equal_from_nonempty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool, std::greater<int>>>(allocator);
+
+    auto alpha = tree->create_node(10, false);
+    auto beta = tree->create_node(20, false);
+    auto gamma= tree->create_node(40, false);
+    auto delta = tree->create_node(50, false);
+    auto eta = tree->create_node(70, false);
+    auto theta = tree->create_node(80, false);
+    auto iota = tree->create_node(110, false);
+    auto kappa = tree->create_node(140, false);
+    auto lambda = tree->create_node(150, false);
+
+    tree->add(gamma);
+    tree->add(lambda);
+    tree->add(beta);
+    tree->add(kappa);
+    tree->add(theta);
+    tree->add(alpha);
+    tree->add(eta);
+    tree->add(delta);
+    tree->add(iota);
+
+    print_tree(tree);
+
+    BOOST_REQUIRE(tree->root() == eta);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == gamma);
+    BOOST_REQUIRE(eta->right == kappa);
+    BOOST_REQUIRE(gamma->is_red);
+    BOOST_REQUIRE(gamma->left == beta);
+    BOOST_REQUIRE(gamma->right == delta);
+    BOOST_REQUIRE(!beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(alpha->is_red);
+    BOOST_REQUIRE(!delta->is_red);
+    BOOST_REQUIRE(kappa->is_red);
+    BOOST_REQUIRE(kappa->left == theta);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(!theta->is_red);
+    BOOST_REQUIRE(theta->right == iota);
+    BOOST_REQUIRE(iota->is_red);
+    BOOST_REQUIRE(!lambda->is_red);
+
+    BOOST_REQUIRE(tree->retrieve_greater_equal(5) == alpha);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(10) == alpha);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(15) == beta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(20) == beta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(30) == gamma);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(40) == gamma);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(45) == delta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(50) == delta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(60) == eta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(70) == eta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(75) == theta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(80) == theta);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(95) == iota);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(110) == iota);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(125) == kappa);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(140) == kappa);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(145) == lambda);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(150) == lambda);
+    BOOST_REQUIRE(tree->retrieve_greater_equal(155) == tree->nil());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

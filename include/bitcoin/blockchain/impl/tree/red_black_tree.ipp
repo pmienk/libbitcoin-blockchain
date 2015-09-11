@@ -147,9 +147,9 @@ void red_black_tree<Key, Value, Comparer, Allocator>::add(
         parent = current;
 
         if (comparer_(node->key, current->key))
-            current = current->left;
-        else
             current = current->right;
+        else
+            current = current->left;
     }
 
     node->parent = parent;
@@ -157,9 +157,9 @@ void red_black_tree<Key, Value, Comparer, Allocator>::add(
     if (parent == nil_)
         root_ = node;
     else if (comparer_(node->key, parent->key))
-        parent->left = node;
-    else
         parent->right = node;
+    else
+        parent->left = node;
 
     balance_add(node);
 }
@@ -226,10 +226,41 @@ typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
         if (equal)
             break;
         else if (a_compare_b)
-            current = current->left;
-        else
             current = current->right;
+        else
+            current = current->left;
     }
+
+    return current;
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+    red_black_tree<Key, Value, Comparer, Allocator>::retrieve_greater_equal(
+        key_type key)
+{
+    node_type* last = nil_;
+    node_type* current = root_;
+
+    while (current != nil_)
+    {
+        bool a_compare_b = comparer_(key, current->key);
+        bool b_compare_a = comparer_(current->key, key);
+        bool equal = (a_compare_b && b_compare_a) || (!a_compare_b && !b_compare_a);
+
+        if (equal)
+            break;
+        else if (a_compare_b)
+            current = current->right;
+        else
+        {
+            last = current;
+            current = current->left;
+        }
+    }
+
+    if (current == nil_)
+        current = last;
 
     return current;
 }

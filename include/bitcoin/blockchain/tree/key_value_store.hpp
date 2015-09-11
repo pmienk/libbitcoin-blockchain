@@ -29,7 +29,7 @@ namespace blockchain {
 
 template<typename Key,
     typename Value,
-    typename Comparer = std::less<Key>>
+    typename Comparer = std::greater<Key>>
 class key_value_store
 {
 public:
