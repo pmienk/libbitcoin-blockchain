@@ -1011,8 +1011,6 @@ BOOST_AUTO_TEST_CASE(retrieve_greater_equal_from_nonempty_tree)
     tree->add(delta);
     tree->add(iota);
 
-    print_tree(tree);
-
     BOOST_REQUIRE(tree->root() == eta);
     BOOST_REQUIRE(!eta->is_red);
     BOOST_REQUIRE(eta->left == gamma);
@@ -1051,6 +1049,123 @@ BOOST_AUTO_TEST_CASE(retrieve_greater_equal_from_nonempty_tree)
     BOOST_REQUIRE(tree->retrieve_greater_equal(145) == lambda);
     BOOST_REQUIRE(tree->retrieve_greater_equal(150) == lambda);
     BOOST_REQUIRE(tree->retrieve_greater_equal(155) == tree->nil());
+}
+
+//
+// minimum tests
+//
+BOOST_AUTO_TEST_CASE(minimum_from_empty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto result = tree->minimum();
+
+    BOOST_REQUIRE(tree->nil() == result);
+
+}
+
+BOOST_AUTO_TEST_CASE(minimum_from_nonempty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == iota);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(iota->left == beta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    auto result = tree->minimum();
+
+    BOOST_REQUIRE(alpha == result);
+}
+
+//
+// maximum tests
+//
+BOOST_AUTO_TEST_CASE(maximum_from_empty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto result = tree->maximum();
+
+    BOOST_REQUIRE(tree->nil() == result);
+}
+
+BOOST_AUTO_TEST_CASE(maximum_from_nonempty_tree)
+{
+    std::allocator<red_black_node<int, bool>> allocator;
+    auto tree = std::make_shared<red_black_tree<int, bool>>(allocator);
+
+    auto alpha = tree->create_node(1, false);
+    auto beta = tree->create_node(2, false);
+    auto delta = tree->create_node(5, false);
+    auto eta = tree->create_node(7, false);
+    auto theta = tree->create_node(8, false);
+    auto iota = tree->create_node(11, false);
+    auto kappa = tree->create_node(14, false);
+    auto lambda = tree->create_node(15, false);
+
+    tree->add(iota);
+    tree->add(alpha);
+    tree->add(kappa);
+    tree->add(beta);
+    tree->add(delta);
+    tree->add(lambda);
+    tree->add(eta);
+    tree->add(theta);
+
+    BOOST_REQUIRE(tree->root() == iota);
+    BOOST_REQUIRE(!iota->is_red);
+    BOOST_REQUIRE(iota->left == beta);
+    BOOST_REQUIRE(iota->right == kappa);
+    BOOST_REQUIRE(beta->is_red);
+    BOOST_REQUIRE(beta->left == alpha);
+    BOOST_REQUIRE(beta->right == eta);
+    BOOST_REQUIRE(!alpha->is_red);
+    BOOST_REQUIRE(!eta->is_red);
+    BOOST_REQUIRE(eta->left == delta);
+    BOOST_REQUIRE(eta->right == theta);
+    BOOST_REQUIRE(delta->is_red);
+    BOOST_REQUIRE(theta->is_red);
+    BOOST_REQUIRE(!kappa->is_red);
+    BOOST_REQUIRE(kappa->right == lambda);
+    BOOST_REQUIRE(lambda->is_red);
+
+    auto result = tree->maximum();
+
+    BOOST_REQUIRE(lambda == result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

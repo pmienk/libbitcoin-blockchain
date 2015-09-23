@@ -37,8 +37,6 @@ public:
 
     explicit red_black_node();
 
-    bool has_children() const;
-
     key_type key;
     value_type value;
     bool is_red;

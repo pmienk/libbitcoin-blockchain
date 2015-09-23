@@ -32,6 +32,7 @@
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/orphan_pool.hpp>
 #include <bitcoin/blockchain/pointer_array_source.hpp>
+#include <bitcoin/blockchain/reverse_iterator.hpp>
 #include <bitcoin/blockchain/settings.hpp>
 #include <bitcoin/blockchain/simple_chain.hpp>
 #include <bitcoin/blockchain/transaction_pool.hpp>
@@ -55,9 +56,17 @@
 #include <bitcoin/blockchain/implementation/organizer_impl.hpp>
 #include <bitcoin/blockchain/implementation/simple_chain_impl.hpp>
 #include <bitcoin/blockchain/implementation/validate_block_impl.hpp>
-#include <bitcoin/blockchain/tree/key_value_store.hpp>
+#include <bitcoin/blockchain/tree/red_black_iterator.hpp>
 #include <bitcoin/blockchain/tree/red_black_node.hpp>
+#include <bitcoin/blockchain/tree/red_black_reverse_iterator.hpp>
 #include <bitcoin/blockchain/tree/red_black_store.hpp>
 #include <bitcoin/blockchain/tree/red_black_tree.hpp>
+#include <bitcoin/blockchain/trie/fixed_secondary_key_structure_iterator.hpp>
+#include <bitcoin/blockchain/trie/fixed_secondary_key_value_iterator.hpp>
+#include <bitcoin/blockchain/trie/modified_patricia_trie.hpp>
+#include <bitcoin/blockchain/trie/prefix_query_result.hpp>
+#include <bitcoin/blockchain/trie/trie_reverse_iterator.hpp>
+#include <bitcoin/blockchain/trie/trie_structure_node.hpp>
+#include <bitcoin/blockchain/trie/trie_value_node.hpp>
 
 #endif

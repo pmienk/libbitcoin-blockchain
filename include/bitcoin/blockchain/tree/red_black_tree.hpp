@@ -41,7 +41,6 @@ public:
     typedef Comparer key_type_comparer;
     typedef Allocator node_allocator;
     typedef red_black_node<key_type, value_type> node_type;
-    typedef std::pair<value_type, bool> pair_value_bool;
 
 public:
 
@@ -53,11 +52,13 @@ public:
     // node variants of exposed functions
     void add(node_type* node);
     void remove(node_type* node);
-    node_type* retrieve(key_type key);
-    node_type* retrieve_greater_equal(key_type key);
+    node_type* retrieve(const key_type& key);
+    node_type* retrieve_greater_equal(const key_type& key);
+    node_type* minimum() const;
+    node_type* maximum() const;
 
-    const node_type* root() const;
-    const node_type* nil() const;
+    node_type* root() const;
+    node_type* nil() const;
 
     node_type* create_node(const key_type& key, const value_type& value);
     bool destroy_node(node_type* node);
@@ -75,7 +76,8 @@ private:
     void balance_remove(node_type* node);
     node_type* leftmost_leaf(node_type* node);
     void transplant(node_type* alpha, node_type* beta);
-    node_type* tree_minimum(node_type* node);
+    node_type* tree_minimum(node_type* node) const;
+    node_type* tree_maximum(node_type* node) const;
     void rotate_left(node_type* alpha);
     void rotate_right(node_type* alpha);
 

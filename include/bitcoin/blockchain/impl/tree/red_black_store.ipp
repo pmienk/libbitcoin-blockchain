@@ -33,7 +33,7 @@ red_black_store<Key, Value, Comparer, Allocator>::red_black_store(
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
 red_black_store<Key, Value, Comparer, Allocator>::red_black_store(
-    std::shared_ptr<tree_type> tree)
+    tree_type* tree)
     : tree_(tree)
 {
 }
@@ -41,11 +41,16 @@ red_black_store<Key, Value, Comparer, Allocator>::red_black_store(
 template<typename Key, typename Value, typename Comparer, typename Allocator>
 red_black_store<Key, Value, Comparer, Allocator>::~red_black_store()
 {
+    if (tree_ != nullptr)
+        delete tree_;
+
+    tree_ = nullptr;
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
-bool red_black_store<Key, Value, Comparer, Allocator>::add(key_type key,
-    value_type value, bool replace)
+typename red_black_store<Key, Value, Comparer, Allocator>::pair_iterator_bool
+    red_black_store<Key, Value, Comparer, Allocator>::add(const key_type& key,
+        value_type value, bool replace)
 {
     auto node = tree_->retrieve(key);
 
@@ -54,7 +59,7 @@ bool red_black_store<Key, Value, Comparer, Allocator>::add(key_type key,
         if (replace)
             node->value = value;
 
-        return replace;
+        return std::make_pair(iterator(tree_, node), replace);
     }
 
     // created as red node with no children
@@ -62,11 +67,12 @@ bool red_black_store<Key, Value, Comparer, Allocator>::add(key_type key,
 
     tree_->add(node);
 
-    return true;
+    return std::make_pair(iterator(tree_, node), true);
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
-bool red_black_store<Key, Value, Comparer, Allocator>::remove(key_type key)
+bool red_black_store<Key, Value, Comparer, Allocator>::remove(
+    const key_type& key)
 {
     bool result = false;
     auto node = tree_->retrieve(key);
@@ -82,13 +88,105 @@ bool red_black_store<Key, Value, Comparer, Allocator>::remove(key_type key)
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
-typename red_black_store<Key, Value, Comparer, Allocator>::pair_value_bool
-    red_black_store<Key, Value, Comparer, Allocator>::retrieve(key_type key)
+typename red_black_store<Key, Value, Comparer, Allocator>::pair_iterator_bool
+    red_black_store<Key, Value, Comparer, Allocator>::retrieve(
+        const key_type& key) const
 {
     auto node = tree_->retrieve(key);
+    return std::make_pair(iterator(tree_, node), (node != tree_->nil()));
+}
 
-    return std::make_pair((node != tree_->nil()) ? node->value : value_type(),
-        (node != tree_->nil()));
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::pair_iterator_bool
+    red_black_store<Key, Value, Comparer, Allocator>::retrieve_greater_equal(
+        const key_type& key) const
+{
+    auto node = tree_->retrieve_greater_equal(key);
+    return std::make_pair(iterator(tree_, node), (node != tree_->nil()));
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::iterator
+    red_black_store<Key, Value, Comparer, Allocator>::begin()
+{
+    return iterator(tree_, tree_->minimum());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::iterator
+    red_black_store<Key, Value, Comparer, Allocator>::end()
+{
+    return iterator(tree_, tree_->nil());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::begin() const
+{
+    return const_iterator(tree_, tree_->minimum());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::end() const
+{
+    return const_iterator(tree_, tree_->nil());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::cbegin() const
+{
+    return begin();
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::cend() const
+{
+    return end();
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::rbegin()
+{
+    return static_cast<reverse_iterator>(end());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::rend()
+{
+    return static_cast<reverse_iterator>(begin());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::rbegin() const
+{
+    return static_cast<const_reverse_iterator>(end());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::rend() const
+{
+    return static_cast<const_reverse_iterator>(begin());
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::crbegin() const
+{
+    return rbegin();
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_store<Key, Value, Comparer, Allocator>::const_reverse_iterator
+    red_black_store<Key, Value, Comparer, Allocator>::crend() const
+{
+    return rend();
 }
 
 } // namespace blockchain

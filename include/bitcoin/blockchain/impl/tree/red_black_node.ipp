@@ -31,12 +31,6 @@ red_black_node<Key, Value>::red_black_node()
 {
 }
 
-template <typename Key, typename Value>
-bool red_black_node<Key, Value>::has_children() const
-{
-    return (right != nullptr) || (left != nullptr);
-}
-
 } // namespace blockchain
 } // namespace libbitcoin
 

@@ -83,7 +83,8 @@ test_libbitcoin_blockchain_test_SOURCES = \
     test/transaction_pool.cpp \
     test/validate_block.cpp \
     test/tree/red_black_store.cpp \
-    test/tree/red_black_tree.cpp
+    test/tree/red_black_tree.cpp \
+    test/trie/modified_patricia_trie.cpp
 
 endif WITH_TESTS
 
@@ -299,6 +300,7 @@ include_bitcoin_blockchain_HEADERS = \
     include/bitcoin/blockchain/organizer.hpp \
     include/bitcoin/blockchain/orphan_pool.hpp \
     include/bitcoin/blockchain/pointer_array_source.hpp \
+    include/bitcoin/blockchain/reverse_iterator.hpp \
     include/bitcoin/blockchain/settings.hpp \
     include/bitcoin/blockchain/simple_chain.hpp \
     include/bitcoin/blockchain/transaction_pool.hpp \
@@ -330,13 +332,26 @@ include_bitcoin_blockchain_impl_HEADERS = \
     include/bitcoin/blockchain/impl/htdb_slab.ipp \
     include/bitcoin/blockchain/impl/htdb_slab_list_item.ipp \
     include/bitcoin/blockchain/impl/multimap_records.ipp \
-    include/bitcoin/blockchain/impl/remainder.ipp
+    include/bitcoin/blockchain/impl/remainder.ipp \
+    include/bitcoin/blockchain/impl/reverse_iterator.ipp
 
 include_bitcoin_blockchain_impl_treedir = ${includedir}/bitcoin/blockchain/impl/tree
 include_bitcoin_blockchain_impl_tree_HEADERS = \
+    include/bitcoin/blockchain/impl/tree/red_black_iterator.ipp \
     include/bitcoin/blockchain/impl/tree/red_black_node.ipp \
+    include/bitcoin/blockchain/impl/tree/red_black_reverse_iterator.ipp \
     include/bitcoin/blockchain/impl/tree/red_black_store.ipp \
     include/bitcoin/blockchain/impl/tree/red_black_tree.ipp
+
+include_bitcoin_blockchain_impl_triedir = ${includedir}/bitcoin/blockchain/impl/trie
+include_bitcoin_blockchain_impl_trie_HEADERS = \
+    include/bitcoin/blockchain/impl/trie/fixed_secondary_key_structure_iterator.ipp \
+    include/bitcoin/blockchain/impl/trie/fixed_secondary_key_value_iterator.ipp \
+    include/bitcoin/blockchain/impl/trie/modified_patricia_trie.ipp \
+    include/bitcoin/blockchain/impl/trie/prefix_query_result.ipp \
+    include/bitcoin/blockchain/impl/trie/trie_reverse_iterator.ipp \
+    include/bitcoin/blockchain/impl/trie/trie_structure_node.ipp \
+    include/bitcoin/blockchain/impl/trie/trie_value_node.ipp
 
 include_bitcoin_blockchain_implementationdir = ${includedir}/bitcoin/blockchain/implementation
 include_bitcoin_blockchain_implementation_HEADERS = \
@@ -347,10 +362,21 @@ include_bitcoin_blockchain_implementation_HEADERS = \
 
 include_bitcoin_blockchain_treedir = ${includedir}/bitcoin/blockchain/tree
 include_bitcoin_blockchain_tree_HEADERS = \
-    include/bitcoin/blockchain/tree/key_value_store.hpp \
+    include/bitcoin/blockchain/tree/red_black_iterator.hpp \
     include/bitcoin/blockchain/tree/red_black_node.hpp \
+    include/bitcoin/blockchain/tree/red_black_reverse_iterator.hpp \
     include/bitcoin/blockchain/tree/red_black_store.hpp \
     include/bitcoin/blockchain/tree/red_black_tree.hpp
+
+include_bitcoin_blockchain_triedir = ${includedir}/bitcoin/blockchain/trie
+include_bitcoin_blockchain_trie_HEADERS = \
+    include/bitcoin/blockchain/trie/fixed_secondary_key_structure_iterator.hpp \
+    include/bitcoin/blockchain/trie/fixed_secondary_key_value_iterator.hpp \
+    include/bitcoin/blockchain/trie/modified_patricia_trie.hpp \
+    include/bitcoin/blockchain/trie/prefix_query_result.hpp \
+    include/bitcoin/blockchain/trie/trie_reverse_iterator.hpp \
+    include/bitcoin/blockchain/trie/trie_structure_node.hpp \
+    include/bitcoin/blockchain/trie/trie_value_node.hpp
 
 
 # Custom make targets.

@@ -41,14 +41,14 @@ red_black_tree<Key, Value, Comparer, Allocator>::~red_black_tree()
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
-const typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::root() const
 {
     return root_;
 }
 
 template<typename Key, typename Value, typename Comparer, typename Allocator>
-const typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::nil() const
 {
     return nil_;
@@ -213,7 +213,7 @@ void red_black_tree<Key, Value, Comparer, Allocator>::remove(
 template<typename Key, typename Value, typename Comparer, typename Allocator>
 typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::retrieve(
-        key_type key)
+        const key_type& key)
 {
     node_type* current = root_;
 
@@ -237,7 +237,7 @@ typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
 template<typename Key, typename Value, typename Comparer, typename Allocator>
 typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::retrieve_greater_equal(
-        key_type key)
+        const key_type& key)
 {
     node_type* last = nil_;
     node_type* current = root_;
@@ -423,12 +423,25 @@ void red_black_tree<Key, Value, Comparer, Allocator>::transplant(
 template<typename Key, typename Value, typename Comparer, typename Allocator>
 typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
     red_black_tree<Key, Value, Comparer, Allocator>::tree_minimum(
-        node_type* node)
+        node_type* node) const
 {
     auto current = node;
 
     while (current->left != nil_)
         current = current->left;
+
+    return current;
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+    red_black_tree<Key, Value, Comparer, Allocator>::tree_maximum(
+        node_type* node) const
+{
+    auto current = node;
+
+    while (current->right != nil_)
+        current = current->right;
 
     return current;
 }
@@ -463,6 +476,30 @@ void red_black_tree<Key, Value, Comparer, Allocator>::rotate_right(
 
     beta->right = alpha;
     alpha->parent = beta;
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+    red_black_tree<Key, Value, Comparer, Allocator>::minimum() const
+{
+    auto result = nil_;
+
+    if (root_ != nil_)
+        result = tree_minimum(root_);
+
+    return result;
+}
+
+template<typename Key, typename Value, typename Comparer, typename Allocator>
+typename red_black_tree<Key, Value, Comparer, Allocator>::node_type*
+    red_black_tree<Key, Value, Comparer, Allocator>::maximum() const
+{
+    auto result = nil_;
+
+    if (root_ != nil_)
+        result = tree_maximum(root_);
+
+    return result;
 }
 
 } // namespace blockchain
