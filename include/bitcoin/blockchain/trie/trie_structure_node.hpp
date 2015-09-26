@@ -87,6 +87,8 @@ public:
 
     bool has_children(const key_type& key) const;
 
+    bool has_value() const;
+
     bool has_value(const key_type& key) const;
 
     structure_node_type* get_child(bool matching_bit) const;

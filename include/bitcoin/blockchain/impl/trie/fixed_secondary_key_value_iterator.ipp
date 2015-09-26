@@ -69,7 +69,8 @@ fixed_secondary_key_value_iterator<K, V, P, R, C>::fixed_secondary_key_value_ite
 template <typename K, typename V, typename P, typename R, typename C>
 fixed_secondary_key_value_iterator<K, V, P, R, C>::fixed_secondary_key_value_iterator(
     const key_type& key, value_node_ptr value_node)
-    : iterator_(key, value_node->anchor), value_node_(value_node)
+    : iterator_(key, (value_node != nullptr) ? value_node->anchor : nullptr),
+      value_node_(value_node)
 {
 }
 
@@ -210,6 +211,13 @@ typename fixed_secondary_key_value_iterator<K, V, P, R, C>::key_type
     fixed_secondary_key_value_iterator<K, V, P, R, C>::get_secondary_key() const
 {
     return iterator_.get_secondary_key();
+}
+
+template <typename K, typename V, typename P, typename R, typename C>
+typename fixed_secondary_key_value_iterator<K, V, P, R, C>::structure_iterator
+    fixed_secondary_key_value_iterator<K, V, P, R, C>::get_structure_iterator() const
+{
+    return iterator_;
 }
 
 } // namespace blockchain

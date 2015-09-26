@@ -40,6 +40,14 @@
 namespace libbitcoin {
 namespace blockchain {
 
+template<typename Key,
+    typename Value,
+    typename KeyComparer,
+    typename ValueComparer,
+    typename StructureNodeAllocator,
+    typename ValueNodeAllocator>
+class modified_patricia_trie;
+
 template <typename Key,
     typename Value,
     typename Pointer,
@@ -47,6 +55,10 @@ template <typename Key,
     typename Comparer>
 class fixed_secondary_key_value_iterator
 {
+    template <typename K, typename V, typename KC, typename VC, typename SNA,
+        typename VNA>
+    friend class modified_patricia_trie;
+
 public:
 
     typedef ptrdiff_t difference_type;
@@ -94,6 +106,8 @@ public:
     bool last_value_with_primary_key() const;
 
     key_type get_secondary_key() const;
+
+    structure_iterator get_structure_iterator() const;
 
     // iterator methods
     reference operator*() const;

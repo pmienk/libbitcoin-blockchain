@@ -139,14 +139,18 @@ template <typename Key, typename Value, typename Pointer>
 void fixed_secondary_key_structure_iterator<Key, Value, Pointer>::increment()
 {
     cached_primary_key_.resize(0);
-    trie_node_ = next_node_with_value(secondary_key_, trie_node_);
+
+    if (trie_node_ != nullptr)
+        trie_node_ = next_node_with_value(secondary_key_, trie_node_);
 }
 
 template <typename Key, typename Value, typename Pointer>
 void fixed_secondary_key_structure_iterator<Key, Value, Pointer>::decrement()
 {
     cached_primary_key_.resize(0);
-    trie_node_ = previous_node_with_value(secondary_key_, trie_node_);
+
+    if (trie_node_ != nullptr)
+        trie_node_ = previous_node_with_value(secondary_key_, trie_node_);
 }
 
 template <typename Key, typename Value, typename Pointer>
@@ -163,7 +167,7 @@ binary_type fixed_secondary_key_structure_iterator<Key, Value, Pointer>::get_pri
             current = current->parent;
         }
 
-        for (auto node = nodes.rbegin(); node != nodes.rend(); node++)
+        for (auto node = nodes.rbegin(); node != nodes.rend(); ++node)
             cached_primary_key_.append((*node)->label);
     }
 

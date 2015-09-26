@@ -65,7 +65,9 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
 
     auto begin = iterator(key, (*result.first).head);
     auto end = iterator(key, (*result.first).tail);
-    ++end;
+
+    if ((*result.first).tail != nullptr)
+        ++end;
 
     return std::make_pair(begin, end);
 }
@@ -84,7 +86,10 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
         return std::make_pair(terminal_, terminal_);
 
     auto begin = iterator(key, (*result.first).head);
-    auto end = ++(iterator(key, (*result.first).tail));
+    auto end = iterator(key, (*result.first).tail);
+
+    if ((*result.first).tail != nullptr)
+        ++end;
 
     return std::make_pair(begin, end);
 }
@@ -103,7 +108,10 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
         return std::make_pair(terminal_, terminal_);
 
     auto begin = iterator(key, (*result.first).leftmost);
-    auto end = ++(iterator(key, (*result.first).rightmost));
+    auto end = iterator(key, (*result.first).rightmost);
+
+    if ((*result.first).rightmost != nullptr)
+        ++end;
 
     return std::make_pair(begin, end);
 }
@@ -122,7 +130,10 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
         return std::make_pair(terminal_, terminal_);
 
     auto begin = iterator(key, (*result.first).leftmost);
-    auto end = ++(iterator(key, (*result.first).rightmost));
+    auto end = iterator(key, (*result.first).rightmost);
+
+    if ((*result.first).rightmost != nullptr)
+        ++end;
 
     return std::make_pair(begin, end);
 }

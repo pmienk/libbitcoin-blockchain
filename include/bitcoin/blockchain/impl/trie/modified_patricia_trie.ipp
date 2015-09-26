@@ -47,8 +47,6 @@ modified_patricia_trie<K, V, KC, VC, SNA, VNA>::modified_patricia_trie(
       value_allocator_(value_allocator), root_(create_structure_node()),
       end_(secondary_key_type(), root_)
 {
-//    root_->next = root_;
-//    root_->previous = root_;
 }
 
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
@@ -103,16 +101,6 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return node;
 }
 
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_structure_node(
-//        const binary_type& key, const value_node_type* value_node)
-//{
-//    auto node = create_structure_node(key);
-//    append_value(node, value_node);
-//    return node;
-//}
-
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_structure_node(
@@ -149,11 +137,11 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
     {
         for (auto it = node->store.begin(); it != node->store.end(); ++it)
         {
-            auto* value = (*it).head;
+            auto value = (*it).head;
 
             while (value != nullptr)
             {
-                auto* next = value->next;
+                auto next = value->next;
                 destroy_value_node(value);
                 value = next;
             }
@@ -164,121 +152,73 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
     }
 }
 
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_subtree(
-////    structure_node_type* node)
-////{
-////    if (node != nullptr)
-////    {
-////        // identify previous/next pointers which need reset to separate
-////        // the subtree from the rest of the tree
-////        auto* first_in_subtree = node;
-////        structure_node_type* previous_outside_subtree = nullptr;
-////
-////        if (node->value_leftmost != nullptr)
-////        {
-////            first_in_subtree = node->value_leftmost->anchor;
-////            previous_outside_subtree = first_in_subtree->previous;
-////        }
-////
-////        auto* last_in_subtree = node;
-////        structure_node_type* next_outside_subtree = nullptr;
-////
-////        if (node->value_rightmost != nullptr)
-////        {
-////            last_in_subtree = node->value_rightmost->anchor;
-////            next_outside_subtree = last_in_subtree->next;
-////        }
-////
-////        // sever the subtree from the remaining tree by resetting
-////        // previous, next, parent and child pointers
-////        auto* parent_from_tree = node->parent;
-////
-////        if (parent_from_tree != nullptr)
-////        {
-////            parent_from_tree->set_child(node->label[0], nullptr);
-////            node->parent = nullptr;
-////        }
-////
-////        first_in_subtree->previous = node;
-////        last_in_subtree->next = node;
-////
-////        if (previous_outside_subtree != nullptr)
-////            previous_outside_subtree->next = next_outside_subtree;
-////
-////        if (next_outside_subtree != nullptr)
-////            next_outside_subtree->previous = previous_outside_subtree;
-////
-////        // should be done, can't do it now without propegating nullptrs
-////        // update_left_and_right_branch(parent_from_tree);
-////
-////        // descend first children to leaf
-////        auto* current = get_leftmost_leaf(node);
-////
-////        // erase node, remembering parent and which child was matching
-////        // if not first child, current is parent
-////        // otherwise descend first children of last child until leaf
-////        while (current != nullptr)
-////        {
-////            auto* next = current->parent;
-////            if (next != nullptr)
-////            {
-////                if (next->get_last_child() != current)
-////                    next = get_leftmost_leaf(next->get_last_child());
-////
-////                current->parent->set_child(current->label[0], nullptr);
-////            }
-////
-////            // destroy the leaf, regardless of contained values
-////            destroy_structure_node(current);
-////            current = next;
-////        }
-////    }
-////}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::compress_branch(
-//        structure_node_type* node)
-//{
-//    if (node != nullptr)
-//    {
-//        auto update = true;
-//
-//        // while not the trie root (designated by null parent), having no value
-//        // and having no children, delete leaf and replace reference with its parent
-//        while ((node->parent != nullptr) && !node->has_value())
-//        {
-//            auto parent = node->parent;
-//            if (node->has_children())
-//            {
-//                // Can we collapse this node out of the trie before termination?
-//                if (node->get_first_child() == node->get_last_child())
-//                {
-//                    auto replacement = node->get_last_child();
-//                    replacement->label.prepend(node->label);
-//                    attach_child(parent, replacement);
-//                    destroy_structure_node(node);
-//                    node = replacement;
-//                    update = false; // was triggered by attach_child
-//                }
-//
-//                break;
-//            }
-//
-//            // remove child reference within parent, delete leaf
-//            parent->set_child(node->label[0], nullptr);
-//            unlink_node(node);
-//            destroy_structure_node(node);
-//            node = parent;
-//        }
-//
-//        if (update)
-//            update_left_and_right_branch(node);
-//    }
-//
-//    return node;
-//}
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
+    structure_node_type* node, const secondary_key_type& key)
+{
+    if (node != nullptr)
+    {
+        auto bounds = node->store.retrieve(key);
+
+        if (bounds.second)
+        {
+            auto value = (*bounds.first).head;
+
+            while (value != nullptr)
+            {
+                auto next = value->next;
+                destroy_value_node(value);
+                value = next;
+            }
+
+            (*bounds.first).head = nullptr;
+            (*bounds.first).tail = nullptr;
+        }
+    }
+}
+
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::compress_branch(
+        structure_node_type* node, const secondary_key_type& key)
+{
+    if (node != nullptr)
+    {
+        auto update = true;
+
+        // while not the trie root (designated by null parent), having no value
+        // and having no children, delete leaf and replace reference with its parent
+        while ((node->parent != nullptr) && !node->has_value())
+        {
+            auto parent = node->parent;
+            if (node->has_children())
+            {
+                // Can we collapse this node out of the trie before termination?
+                if (node->get_first_child() == node->get_last_child())
+                {
+                    auto replacement = node->get_last_child();
+                    replacement->label.prepend(node->label);
+                    attach_child(parent, replacement);
+                    destroy_structure_node(node);
+                    node = replacement;
+                    update = false; // was triggered by attach_child
+                }
+
+                break;
+            }
+
+            // remove child reference within parent, delete leaf
+            parent->set_child(node->label[0], nullptr);
+            destroy_structure_node(node);
+            node = parent;
+        }
+
+        if (update)
+            update_left_and_right_branch(node, key);
+    }
+
+    return node;
+}
 
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
@@ -382,38 +322,6 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return current;
 }
 
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::get_rightmost_leaf(
-//        structure_node_type* origin) const
-//{
-//    auto* current = origin;
-//    while (current->has_children())
-//        current = current->get_last_child();
-//
-//    return current;
-//}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::get_leftmost_node(
-//        structure_node_type* origin) const
-//{
-//    auto* current = origin;
-//    while (current->has_children() && !(current->has_value()))
-//        current = current->get_first_child();
-//
-//    return current;
-//}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::get_rightmost_node(
-//        structure_node_type* origin) const
-//{
-//    return get_rightmost_leaf(origin);
-//}
-
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right(
     structure_node_type* node, const secondary_key_type& key)
@@ -426,6 +334,9 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right(
         {
             (*result.first).leftmost = (*result.first).head;
             (*result.first).rightmost = (*result.first).tail;
+
+            if ((*result.first).leftmost == nullptr)
+                node->store.remove(key);
         }
     }
     else
@@ -468,163 +379,6 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right_branc
     }
 }
 
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::next_node_with_value(
-//        structure_node_type* node)
-//{
-//    // if at root (designated by null parent), terminate
-//    if (node->parent == nullptr)
-//        return node;
-//
-//    auto next = node;
-//    if (next->has_children())
-//    {
-//        // if this node has a child, then at least one value will be located
-//        // within the subtree, walk the subtree favoring first child until
-//        // a value is reached
-//        do
-//        {
-//            next = next->get_first_child();
-//        } while (!next->has_value());
-//    }
-//    else
-//    {
-//        // if a leaf, back up until a sibling is reached
-//        while (next->parent != nullptr)
-//        {
-//            auto parent = next->parent;
-//
-//            // if sibling found, decend first children until value
-//            if (parent->get_last_child() != next)
-//            {
-//                next = get_leftmost_node(parent->get_last_child());
-//                break;
-//            }
-//
-//            next = parent;
-//        }
-//    }
-//
-//    return next;
-//}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::link_node(
-//    structure_node_type* node)
-//{
-//    unlink_node(node);
-//    auto next = next_node_with_value(node);
-//    auto previous = next->previous;
-//    node->next = next;
-//    node->previous = previous;
-//    next->previous = node;
-//    previous->next = node;
-//}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::unlink_node(
-//    structure_node_type* node)
-//{
-//    // only unlink linked nodes (note that the root node is linked)
-//    if ((node->next != nullptr) && (node->previous != nullptr))
-//    {
-//        auto next = node->next;
-//        auto previous = node->previous;
-//        previous->next = next;
-//        next->previous = previous;
-//        node->previous = nullptr;
-//        node->next = nullptr;
-//    }
-//}
-//
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::begin()
-////{
-////    auto value = root_->value_leftmost;
-////    return (value != nullptr) ? (iterator)value : (iterator)root_;
-////}
-
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::end()
-{
-    return end_;
-}
-
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::begin() const
-////{
-////    auto value = root_->value_leftmost;
-////    return (value != nullptr) ? (const_iterator)value : (const_iterator)root_;
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::end() const
-////{
-////    return (const_iterator)root_;
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::cbegin() const
-////{
-////    auto value = root_->value_leftmost;
-////    return (value != nullptr) ? (const_iterator)value : (const_iterator)root_;
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::cend() const
-////{
-////    return (const_iterator) root_;
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::rbegin()
-////{
-////    return static_cast<reverse_iterator>(end());
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::rend()
-////{
-////    return static_cast<reverse_iterator>(begin());
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::rbegin() const
-////{
-////    return static_cast<const_reverse_iterator>(end());
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::rend() const
-////{
-////    return static_cast<const_reverse_iterator>(begin());
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::crbegin() const
-////{
-////    return rbegin();
-////}
-////
-////template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-////typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::const_reverse_iterator
-////    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::crend() const
-////{
-////    return rend();
-////}
-
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
     const secondary_key_type& key, structure_node_type* parent,
@@ -634,10 +388,7 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
     child->parent = parent;
     parent->set_child(child->label[0], child);
     if (child->has_value(key))
-    {
-//        link_node(child);
         update_left_and_right_branch(child, key);
-    }
 }
 
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
@@ -702,7 +453,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
         bool initial_match_label_exceeds_key = false;
         binary_type::size_type label_offset = 1;
 
-        for (; (label_offset < initial_match->label.size()); label_offset++)
+        for (; (label_offset < initial_match->label.size()); ++label_offset)
         {
             if ((key_offset + label_offset) >= primary.size())
             {
@@ -730,7 +481,6 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
                 label_offset);
 
             // unlink/remove the initial_match from the tree
-//            unlink_node(initial_match);
             initial_match->parent = nullptr;
 
             // add intermediary to tree
@@ -754,8 +504,6 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
                 // otherwise intermediary label must be key, so add value to
                 // the intermediary which was uniquely added and link_node
                 auto* inserted = append_value(intermediary, secondary, value);
-//                link_node(intermediary);
-
                 current = intermediary;
                 return std::make_pair(iterator(secondary, inserted), true);
             }
@@ -785,11 +533,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     // though we aren't guaranteed to be unique
     if (!result.second && (current != root_))
     {
-//        auto linked = current->has_value();
         auto inserted = append_value(current, secondary, value);
-//        if (!linked)
-//            link_node(current);
-
         return std::make_pair(iterator(secondary, inserted), true);
     }
 
@@ -832,7 +576,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_node_size
         {
             for (binary_type::size_type label_offset = 0;
                 (label_offset < initial_match->label.size()) &&
-                    (key_offset + label_offset < key.size()); label_offset++)
+                    (key_offset + label_offset < key.size()); ++label_offset)
             {
                 if (key[key_offset + label_offset]
                     != initial_match->label[label_offset])
@@ -878,7 +622,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     if (primary_key_query_result.second)
         return primary_key_query_result.first.get_exact(secondary);
 
-    return std::make_pair(end(), end());
+    return std::make_pair(end_, end_);
 }
 
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
@@ -902,80 +646,118 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     if (primary_key_query_result.second)
         return primary_key_query_result.first.get_prefixed(secondary);
 
-    return std::make_pair(end(), end());
+    return std::make_pair(end_, end_);
 }
 
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
-//    const binary_type& key, const secondary_key_type& secondary)
-//{
-//    auto find_pair = find_closest_subkey_matching_node(root_, key);
-//    auto nonremovable = ((find_pair.first == nullptr) ||
-//        (find_pair.second != key.size()) || (find_pair.second == 0));
-//
-//    if (!nonremovable)
-//    {
-//        auto node = find_pair.first;
-//        erase_values(node);
-//        compress_branch(node);
-//    }
-//
-//    return !nonremovable;
-//}
-//
-//template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator
-//    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_value(iterator it)
-//{
-//    auto value_node = it.value_node_;
-//    if (value_node == nullptr)
-//        return it;
-//
-//    auto anchor = value_node->anchor;
-//    if (anchor->value_head == anchor->value_tail)
-//    {
-//        auto next = anchor->next;
-//
-//        // otherwise, remove all values and attempt to remove the node
-//        erase_values(anchor);
-//        compress_branch(anchor);
-//
-//        return (iterator)(next);
-//    }
-//
-//    // if the value can be removed without removing emptying the node
-//    auto next = value_node->next;
-//    auto previous = value_node->previous;
-//
-//    if (next != nullptr)
-//        next->previous = previous;
-//
-//    if (previous != nullptr)
-//        previous->next = next;
-//
-//    auto update = false;
-//    value_node->next = nullptr;
-//    value_node->previous = nullptr;
-//
-//    if (anchor->value_head == value_node)
-//    {
-//        anchor->value_head = next;
-//        update = true;
-//    }
-//
-//    if (anchor->value_tail == value_node)
-//    {
-//        anchor->value_tail = previous;
-//        update = true;
-//    }
-//
-//    destroy_value_node(value_node);
-//
-//    if (update)
-//        update_left_and_right_branch(anchor);
-//
-//    return (next == nullptr) ? (iterator)(anchor->next) : (iterator)next;
-//}
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
+    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_secondary_key_bounds(
+        const secondary_key_type& key)
+{
+    auto result = query_result(root_);
+    return result.get_prefixed(key);
+}
+
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
+    const binary_type& primary, const secondary_key_type& secondary)
+{
+    auto find_pair = find_closest_subkey_matching_node(root_, primary);
+    auto nonremovable = ((find_pair.first == nullptr) ||
+        (find_pair.second != primary.size()) || (find_pair.second == 0));
+
+    if (!nonremovable)
+    {
+        auto node = find_pair.first;
+        erase_values(node, secondary);
+        compress_branch(node, secondary);
+    }
+
+    return !nonremovable;
+}
+
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
+    const secondary_key_type& secondary)
+{
+    bool removed = false;
+    query_result prefix_query(root_);
+    auto value_bounds = prefix_query.get_prefixed(secondary);
+    auto begin = value_bounds.first.iterator_;
+    auto end = value_bounds.second.iterator_;
+
+    while (begin != end)
+    {
+        auto node = begin.trie_node_;
+        ++begin;
+        erase_values(node, secondary);
+        compress_branch(node, secondary);
+        removed = true;
+    }
+
+    return removed;
+}
+
+template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator
+    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_value(iterator it)
+{
+    auto value_node = it.value_node_;
+    if (value_node == nullptr)
+        return it;
+
+    auto secondary_key = it.get_secondary_key();
+    auto anchor = value_node->anchor;
+    auto anchor_key_bounds = anchor->store.retrieve(secondary_key);
+
+    auto struct_iter = it.get_structure_iterator();
+    ++struct_iter;
+
+    if ((*anchor_key_bounds.first).head == (*anchor_key_bounds.first).tail)
+    {
+        auto next = struct_iter.trie_node_;
+
+        // otherwise, remove all values and attempt to remove the node
+        erase_values(anchor, secondary_key);
+        compress_branch(anchor, secondary_key);
+
+        return (iterator)(next);
+    }
+
+    // if the value can be removed without removing emptying the node
+    auto next = value_node->next;
+    auto previous = value_node->previous;
+
+    if (next != nullptr)
+        next->previous = previous;
+
+    if (previous != nullptr)
+        previous->next = next;
+
+    auto update = false;
+    value_node->next = nullptr;
+    value_node->previous = nullptr;
+
+    if ((*anchor_key_bounds.first).head == value_node)
+    {
+        (*anchor_key_bounds.first).head = next;
+        update = true;
+    }
+
+    if ((*anchor_key_bounds.first).tail == value_node)
+    {
+        (*anchor_key_bounds.first).tail = previous;
+        update = true;
+    }
+
+    destroy_value_node(value_node);
+
+    if (update)
+        update_left_and_right_branch(anchor, secondary_key);
+
+    return (next == nullptr) ?
+        iterator(secondary_key, struct_iter.trie_node_) : iterator(secondary_key, next);
+}
 
 } // namespace blockchain
 } // namespace libbitcoin

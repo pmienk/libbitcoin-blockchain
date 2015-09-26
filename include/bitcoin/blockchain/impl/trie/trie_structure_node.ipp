@@ -75,6 +75,17 @@ bool trie_structure_node<Key, Node, Comparer>::has_children(const key_type& key)
 }
 
 template<typename Key, typename Node, typename Comparer>
+bool trie_structure_node<Key, Node, Comparer>::has_value() const
+{
+    bool result = false;
+
+    for (auto it = store.begin(); !result && (it != store.end()); ++it)
+        result = ((*it).head != nullptr);
+
+    return result;
+}
+
+template<typename Key, typename Node, typename Comparer>
 bool trie_structure_node<Key, Node, Comparer>::has_value(const key_type& key) const
 {
     bool result = false;

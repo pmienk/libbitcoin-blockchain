@@ -117,16 +117,15 @@ public:
 
     pair_query_result_bool find_prefixed(const binary_type& primary);
 
-//    // deletion
-//    bool remove_equal(const binary_type& primary,
-//        const secondary_key_type& secondary);
-//
-//    bool remove_equal(const secondary_key_type& secondary);
-//
-////    bool remove_prefix(const binary_type& primary,
-////        const secondary_key_type& secondary);
-//
-//    iterator remove_value(iterator it);
+    iterator_range find_secondary_key_bounds(const secondary_key_type& key);
+
+    // deletion
+    bool remove_equal(const binary_type& primary,
+        const secondary_key_type& secondary);
+
+    bool remove_equal(const secondary_key_type& secondary);
+
+    iterator remove_value(iterator it);
 
 protected:
 
@@ -136,9 +135,6 @@ protected:
     structure_node_type* create_structure_node();
 
     structure_node_type* create_structure_node(const binary_type& key);
-
-//    structure_node_type* create_structure_node(const binary_type& key,
-//        const value_node_type* value_node);
 
     structure_node_type* create_structure_node(const binary_type& primary,
         const secondary_key_type& secondary, const value_type& value);
@@ -152,12 +148,6 @@ protected:
 
     // seek methods
     structure_node_type* get_leftmost_leaf(structure_node_type* origin) const;
-//
-//    structure_node_type* get_rightmost_leaf(structure_node_type* origin) const;
-//
-//    structure_node_type* get_leftmost_node(structure_node_type* origin) const;
-//
-//    structure_node_type* get_rightmost_node(structure_node_type* origin) const;
 
     // next/previous/leftmost/rightmost pointer updates
     void update_left_and_right(structure_node_type* node,
@@ -166,22 +156,18 @@ protected:
     void update_left_and_right_branch(structure_node_type* node,
         const secondary_key_type& key);
 
-//    structure_node_type* next_node_with_value(structure_node_type* node);
-//
-//    void link_node(structure_node_type* node);
-//
-//    void unlink_node(structure_node_type* node);
-//
     // cleanup/teardown
     void erase_values(structure_node_type* node);
 
-////    void erase_subtree(structure_node_type* node);
-//
-//    structure_node_type* compress_branch(structure_node_type* node);
-//
+    void erase_values(structure_node_type* node, const secondary_key_type& key);
+
+    structure_node_type* compress_branch(structure_node_type* node,
+        const secondary_key_type& key);
+
     // tree append/insert
-    pair_iterator_bool insert(structure_node_type*& current, const binary_type& primary,
-        const secondary_key_type& secondary, const value_type& value);
+    pair_iterator_bool insert(structure_node_type*& current,
+        const binary_type& primary, const secondary_key_type& secondary,
+        const value_type& value);
 
     value_node_type* append_value(structure_node_type* node,
         const secondary_key_type& key, value_node_type* value_node);
@@ -203,8 +189,6 @@ protected:
 
     pair_node_size find_closest_subkey_matching_node(
         structure_node_type* start, const binary_type& key);
-
-    iterator end();
 
 private:
 
