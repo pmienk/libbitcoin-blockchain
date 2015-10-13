@@ -292,18 +292,24 @@ include_bitcoin_blockchain_HEADERS = \
     include/bitcoin/blockchain/block_chain.hpp \
     include/bitcoin/blockchain/block_detail.hpp \
     include/bitcoin/blockchain/block_fetcher.hpp \
+    include/bitcoin/blockchain/block_identity.hpp \
     include/bitcoin/blockchain/block_info.hpp \
     include/bitcoin/blockchain/block_locator_fetcher.hpp \
+    include/bitcoin/blockchain/block_located.hpp \
+    include/bitcoin/blockchain/block_location.hpp \
     include/bitcoin/blockchain/checkpoint.hpp \
     include/bitcoin/blockchain/database.hpp \
     include/bitcoin/blockchain/define.hpp \
     include/bitcoin/blockchain/organizer.hpp \
     include/bitcoin/blockchain/orphan_pool.hpp \
     include/bitcoin/blockchain/pointer_array_source.hpp \
+    include/bitcoin/blockchain/prefix_queryable.hpp \
+    include/bitcoin/blockchain/query_filter.hpp \
     include/bitcoin/blockchain/reverse_iterator.hpp \
     include/bitcoin/blockchain/settings.hpp \
     include/bitcoin/blockchain/simple_chain.hpp \
     include/bitcoin/blockchain/transaction_pool.hpp \
+    include/bitcoin/blockchain/unspent_transaction_outputs.hpp \
     include/bitcoin/blockchain/validate_block.hpp \
     include/bitcoin/blockchain/validate_transaction.hpp \
     include/bitcoin/blockchain/version.hpp
