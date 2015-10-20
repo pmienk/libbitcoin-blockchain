@@ -34,6 +34,7 @@
 #include <bitcoin/blockchain/define.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/orphan_pool.hpp>
+#include <bitcoin/blockchain/pointer_array_sink.hpp>
 #include <bitcoin/blockchain/pointer_array_source.hpp>
 #include <bitcoin/blockchain/prefix_queryable.hpp>
 #include <bitcoin/blockchain/query_filter.hpp>
@@ -58,6 +59,13 @@
 #include <bitcoin/blockchain/database/spend_database.hpp>
 #include <bitcoin/blockchain/database/stealth_database.hpp>
 #include <bitcoin/blockchain/database/transaction_database.hpp>
+#include <bitcoin/blockchain/database/revised/header_result.hpp>
+#include <bitcoin/blockchain/database/revised/header_store.hpp>
+#include <bitcoin/blockchain/database/revised/merkle_tree_result.hpp>
+#include <bitcoin/blockchain/database/revised/merkle_tree_store.hpp>
+#include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
+#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
+#include <bitcoin/blockchain/database/revised/transaction_store.hpp>
 #include <bitcoin/blockchain/implementation/blockchain_impl.hpp>
 #include <bitcoin/blockchain/implementation/organizer_impl.hpp>
 #include <bitcoin/blockchain/implementation/simple_chain_impl.hpp>

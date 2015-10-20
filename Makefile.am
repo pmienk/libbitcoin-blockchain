@@ -59,6 +59,13 @@ src_libbitcoin_blockchain_la_SOURCES = \
     src/database/transaction_database.cpp \
     src/database/mman-win32/mman.c \
     src/database/mman-win32/mman.h \
+    src/database/revised/header_result.cpp \
+    src/database/revised/header_store.cpp \
+    src/database/revised/merkle_tree_result.cpp \
+    src/database/revised/merkle_tree_store.cpp \
+    src/database/revised/simple_allocator.cpp \
+    src/database/revised/transaction_result.cpp \
+    src/database/revised/transaction_store.cpp \
     src/implementation/blockchain_impl.cpp \
     src/implementation/organizer_impl.cpp \
     src/implementation/simple_chain_impl.cpp \
@@ -294,14 +301,15 @@ include_bitcoin_blockchain_HEADERS = \
     include/bitcoin/blockchain/block_fetcher.hpp \
     include/bitcoin/blockchain/block_identity.hpp \
     include/bitcoin/blockchain/block_info.hpp \
-    include/bitcoin/blockchain/block_locator_fetcher.hpp \
     include/bitcoin/blockchain/block_located.hpp \
     include/bitcoin/blockchain/block_location.hpp \
+    include/bitcoin/blockchain/block_locator_fetcher.hpp \
     include/bitcoin/blockchain/checkpoint.hpp \
     include/bitcoin/blockchain/database.hpp \
     include/bitcoin/blockchain/define.hpp \
     include/bitcoin/blockchain/organizer.hpp \
     include/bitcoin/blockchain/orphan_pool.hpp \
+    include/bitcoin/blockchain/pointer_array_sink.hpp \
     include/bitcoin/blockchain/pointer_array_source.hpp \
     include/bitcoin/blockchain/prefix_queryable.hpp \
     include/bitcoin/blockchain/query_filter.hpp \
@@ -329,6 +337,16 @@ include_bitcoin_blockchain_database_HEADERS = \
     include/bitcoin/blockchain/database/spend_database.hpp \
     include/bitcoin/blockchain/database/stealth_database.hpp \
     include/bitcoin/blockchain/database/transaction_database.hpp
+
+include_bitcoin_blockchain_database_reviseddir = ${includedir}/bitcoin/blockchain/database/revised
+include_bitcoin_blockchain_database_revised_HEADERS = \
+    include/bitcoin/blockchain/database/revised/header_result.hpp \
+    include/bitcoin/blockchain/database/revised/header_store.hpp \
+    include/bitcoin/blockchain/database/revised/merkle_tree_result.hpp \
+    include/bitcoin/blockchain/database/revised/merkle_tree_store.hpp \
+    include/bitcoin/blockchain/database/revised/simple_allocator.hpp \
+    include/bitcoin/blockchain/database/revised/transaction_result.hpp \
+    include/bitcoin/blockchain/database/revised/transaction_store.hpp
 
 include_bitcoin_blockchain_impldir = ${includedir}/bitcoin/blockchain/impl
 include_bitcoin_blockchain_impl_HEADERS = \

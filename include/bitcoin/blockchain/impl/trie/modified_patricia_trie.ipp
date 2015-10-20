@@ -436,7 +436,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
         auto initial_match = current->get_child(primary[key_offset]);
         if (initial_match == nullptr)
         {
-            auto subkey = primary.get_substring(key_offset,
+            auto subkey = primary.substring(key_offset,
                 primary.size() - key_offset);
             auto node = insert_at(current, subkey, secondary, value);
             auto value_bounds = node->store.retrieve(secondary);
@@ -474,10 +474,10 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
         {
             // if there is a disagreement, introduce intermediary node
             // and insert the new branch
-            auto intermediary_key = initial_match->label.get_substring(0,
+            auto intermediary_key = initial_match->label.substring(0,
                 label_offset);
 
-            auto trailing_initial_key = initial_match->label.get_substring(
+            auto trailing_initial_key = initial_match->label.substring(
                 label_offset);
 
             // unlink/remove the initial_match from the tree
@@ -493,7 +493,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
             if (primary.size() > (key_offset + label_offset))
             {
                 // if the key has remaining length, insert a sibling
-                auto remaining_key = primary.get_substring(
+                auto remaining_key = primary.substring(
                     key_offset + label_offset);
 
                 return std::make_pair(iterator(secondary, insert_at(
