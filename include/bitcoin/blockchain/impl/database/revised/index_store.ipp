@@ -81,6 +81,27 @@ typename index_store<IndexData>::index_prefix_query_result_type
 }
 
 template<typename IndexData>
+bool index_store<IndexData>::remove_equal(const binary_type& primary,
+    const secondary_key_type& secondary)
+{
+    return trie_.remove_equal(primary, secondary);
+}
+
+template<typename IndexData>
+bool index_store<IndexData>::remove_equal(const secondary_key_type& secondary)
+{
+    return trie_.remove_equal(secondary);
+}
+
+template<typename IndexData>
+typename index_store<IndexData>::index_data_result_type
+    index_store<IndexData>::remove_value(index_data_result_type it)
+{
+    auto next = trie_.remove_value(it.source_);
+    return (index_data_result_type)(next);
+}
+
+template<typename IndexData>
 void index_store<IndexData>::sync()
 {
 }

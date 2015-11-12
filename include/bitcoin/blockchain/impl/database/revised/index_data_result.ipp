@@ -50,6 +50,13 @@ typename index_data_result<IndexData>::iterator_source::reference
     return *source_;
 }
 
+//template<typename IndexData>
+//typename index_data_result<IndexData>::iterator_source&
+//    index_data_result<IndexData>::source() const
+//{
+//    return source_;
+//}
+
 template<typename IndexData>
 bool index_data_result<IndexData>::operator==(
     const iter_type& other) const

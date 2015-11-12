@@ -60,6 +60,13 @@ public:
 
     index_prefix_query_result_type get(const binary_type& prefix) const;
 
+    bool remove_equal(const binary_type& primary,
+        const secondary_key_type& secondary);
+
+    bool remove_equal(const secondary_key_type& secondary);
+
+    index_data_result_type remove_value(index_data_result_type it);
+
     void sync();
 
 protected:

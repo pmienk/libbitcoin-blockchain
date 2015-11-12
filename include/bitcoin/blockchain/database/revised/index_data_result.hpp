@@ -28,6 +28,9 @@ namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
+template<typename IndexData>
+class index_store;
+
 /**
  * Index of transactions.
  * Used to resolve offsets from hashes.
@@ -36,6 +39,8 @@ template<typename IndexData>
 class index_data_result
 {
 public:
+    friend class index_store<IndexData>;
+
     typedef IndexData index_data_type;
 
     typedef typename modified_patricia_trie<uint32_t,
