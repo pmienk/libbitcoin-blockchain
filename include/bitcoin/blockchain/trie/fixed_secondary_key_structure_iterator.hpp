@@ -80,6 +80,8 @@ public:
 
     fixed_secondary_key_structure_iterator(const iterator& it);
 
+    operator bool() const;
+
     // accessors
     binary_type get_primary_key();
 

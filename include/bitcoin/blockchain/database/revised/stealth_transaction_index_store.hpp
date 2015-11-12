@@ -17,58 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_STORE_HPP
+#ifndef LIBBITCOIN_TRANSACTION_INDEX_STORE_HPP
+#define LIBBITCOIN_TRANSACTION_INDEX_STORE_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
-#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
+#include <bitcoin/blockchain/database/revised/index_store.hpp>
+#include <bitcoin/blockchain/database/revised/simple_transaction_index_data.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
 /**
- * Stores transactions.
- * Lookup possible by file offset.
+ * Index of transactions.
+ * Used to resolve offsets from hashes.
  */
-class BCB_API transaction_store
+class BCB_API stealth_transaction_index_store
+    : public index_store<simple_transaction_index_data>
 {
 public:
-    transaction_store(const boost::filesystem::path& filename);
+    stealth_transaction_index_store();
+
+    ~stealth_transaction_index_store();
 
     /**
-     * Initialize a new transaction database.
+     * Store transaction data in the database.
      */
-    void create();
-
-    /**
-     * You must call start() before using the database.
-     */
-    void start();
-
-    /**
-     * Fetch transaction by offset.
-     */
-    transaction_result get(const simple_allocator::position_type offset) const;
-
-    /**
-     * Store a transaction in the database.
-     */
-    simple_allocator::position_type store(
-        const chain::transaction& transaction);
-
-    /**
-     * Synchronize storage with disk so things are consistent.
-     * Should be done at the end of every write, including those result actions
-     * which modify data.
-     */
-    void sync();
-
-private:
-    mmfile file_;
-    simple_allocator allocator_;
+    index_data_result_type store(const uint32_t& prefix,
+        const secondary_key_type& height,
+        uint8_t chain_id,
+        simple_allocator::position_type offset);
 };
 
 } // namespace revised_database

@@ -82,6 +82,12 @@ fixed_secondary_key_value_iterator<K, V, P, R, C>::fixed_secondary_key_value_ite
 }
 
 template <typename K, typename V, typename P, typename R, typename C>
+fixed_secondary_key_value_iterator<K, V, P, R, C>::operator bool() const
+{
+    return iterator_ && (value_node_ != nullptr);
+}
+
+template <typename K, typename V, typename P, typename R, typename C>
 typename fixed_secondary_key_value_iterator<K, V, P, R, C>::reference
     fixed_secondary_key_value_iterator<K, V, P, R, C>::operator*() const
 {

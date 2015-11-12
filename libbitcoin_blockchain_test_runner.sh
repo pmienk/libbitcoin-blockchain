@@ -9,7 +9,7 @@
 # Define tests and options.
 #==============================================================================
 BOOST_UNIT_TEST_OPTIONS=\
-"--run_test=databases,disk_objs,htdb,modified_patricia_trie_tests,red_black_store_tests,red_black_tree_tests "\
+"--run_test=modified_patricia_trie_tests,red_black_store_tests,red_black_tree_tests "\
 "--show_progress=no "\
 "--detect_memory_leak=0 "\
 "--report_level=no "\

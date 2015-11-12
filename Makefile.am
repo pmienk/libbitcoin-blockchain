@@ -61,9 +61,15 @@ src_libbitcoin_blockchain_la_SOURCES = \
     src/database/mman-win32/mman.h \
     src/database/revised/header_result.cpp \
     src/database/revised/header_store.cpp \
+    src/database/revised/index_data.cpp \
     src/database/revised/merkle_tree_result.cpp \
     src/database/revised/merkle_tree_store.cpp \
+    src/database/revised/payment_address_index_store.cpp \
     src/database/revised/simple_allocator.cpp \
+    src/database/revised/simple_transaction_index_data.cpp \
+    src/database/revised/stealth_transaction_index_store.cpp \
+    src/database/revised/transaction_index_data.cpp \
+    src/database/revised/transaction_index_store.cpp \
     src/database/revised/transaction_result.cpp \
     src/database/revised/transaction_store.cpp \
     src/implementation/blockchain_impl.cpp \
@@ -342,9 +348,18 @@ include_bitcoin_blockchain_database_reviseddir = ${includedir}/bitcoin/blockchai
 include_bitcoin_blockchain_database_revised_HEADERS = \
     include/bitcoin/blockchain/database/revised/header_result.hpp \
     include/bitcoin/blockchain/database/revised/header_store.hpp \
+    include/bitcoin/blockchain/database/revised/index_data.hpp \
+    include/bitcoin/blockchain/database/revised/index_data_result.hpp \
+    include/bitcoin/blockchain/database/revised/index_prefix_query_result.hpp \
+    include/bitcoin/blockchain/database/revised/index_store.hpp \
     include/bitcoin/blockchain/database/revised/merkle_tree_result.hpp \
     include/bitcoin/blockchain/database/revised/merkle_tree_store.hpp \
+    include/bitcoin/blockchain/database/revised/payment_address_index_store.hpp \
     include/bitcoin/blockchain/database/revised/simple_allocator.hpp \
+    include/bitcoin/blockchain/database/revised/simple_transaction_index_data.hpp \
+    include/bitcoin/blockchain/database/revised/stealth_transaction_index_store.hpp \
+    include/bitcoin/blockchain/database/revised/transaction_index_data.hpp \
+    include/bitcoin/blockchain/database/revised/transaction_index_store.hpp \
     include/bitcoin/blockchain/database/revised/transaction_result.hpp \
     include/bitcoin/blockchain/database/revised/transaction_store.hpp
 
@@ -358,6 +373,12 @@ include_bitcoin_blockchain_impl_HEADERS = \
     include/bitcoin/blockchain/impl/multimap_records.ipp \
     include/bitcoin/blockchain/impl/remainder.ipp \
     include/bitcoin/blockchain/impl/reverse_iterator.ipp
+
+include_bitcoin_blockchain_impl_database_reviseddir = ${includedir}/bitcoin/blockchain/impl/database/revised
+include_bitcoin_blockchain_impl_database_revised_HEADERS = \
+    include/bitcoin/blockchain/impl/database/revised/index_data_result.ipp \
+    include/bitcoin/blockchain/impl/database/revised/index_prefix_query_result.ipp \
+    include/bitcoin/blockchain/impl/database/revised/index_store.ipp
 
 include_bitcoin_blockchain_impl_treedir = ${includedir}/bitcoin/blockchain/impl/tree
 include_bitcoin_blockchain_impl_tree_HEADERS = \

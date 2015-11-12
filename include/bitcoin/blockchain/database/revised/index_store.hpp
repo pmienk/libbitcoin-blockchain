@@ -17,62 +17,59 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_STORE_HPP
+#ifndef LIBBITCOIN_INDEX_STORE_HPP
+#define LIBBITCOIN_INDEX_STORE_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
-#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
+#include <bitcoin/blockchain/database/revised/index_data_result.hpp>
+#include <bitcoin/blockchain/database/revised/index_prefix_query_result.hpp>
+#include <bitcoin/blockchain/trie/modified_patricia_trie.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
 /**
- * Stores transactions.
- * Lookup possible by file offset.
+ * Index of transactions.
+ * Used to resolve offsets from hashes.
  */
-class BCB_API transaction_store
+template<typename IndexData>
+class index_store
 {
 public:
-    transaction_store(const boost::filesystem::path& filename);
+    typedef IndexData index_data_type;
 
-    /**
-     * Initialize a new transaction database.
-     */
+    typedef typename modified_patricia_trie<uint32_t,
+        index_data_type>::secondary_key_type secondary_key_type;
+
+    typedef index_prefix_query_result<index_data_type> index_prefix_query_result_type;
+
+    typedef index_data_result<index_data_type> index_data_result_type;
+
+public:
+    index_store();
+
+    ~index_store();
+
     void create();
 
-    /**
-     * You must call start() before using the database.
-     */
     void start();
 
-    /**
-     * Fetch transaction by offset.
-     */
-    transaction_result get(const simple_allocator::position_type offset) const;
+    index_prefix_query_result_type get(const hash_digest& hash) const;
 
-    /**
-     * Store a transaction in the database.
-     */
-    simple_allocator::position_type store(
-        const chain::transaction& transaction);
+    index_prefix_query_result_type get(const binary_type& prefix) const;
 
-    /**
-     * Synchronize storage with disk so things are consistent.
-     * Should be done at the end of every write, including those result actions
-     * which modify data.
-     */
     void sync();
 
-private:
-    mmfile file_;
-    simple_allocator allocator_;
+protected:
+    modified_patricia_trie<uint32_t, index_data_type> trie_;
 };
 
 } // namespace revised_database
 } // namespace blockchain
 } // namespace libbitcoin
+
+#include <bitcoin/blockchain/impl/database/revised/index_store.ipp>
 
 #endif

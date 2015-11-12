@@ -74,6 +74,12 @@ fixed_secondary_key_structure_iterator<Key, Value, Pointer>::fixed_secondary_key
 }
 
 template <typename Key, typename Value, typename Pointer>
+fixed_secondary_key_structure_iterator<Key, Value, Pointer>::operator bool() const
+{
+    return (trie_node_ != nullptr);
+}
+
+template <typename Key, typename Value, typename Pointer>
 typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::reference
     fixed_secondary_key_structure_iterator<Key, Value, Pointer>::operator*() const
 {
@@ -204,7 +210,7 @@ typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::node_ptr
     auto query_result = origin->store.retrieve(key);
 
     if (query_result.second)
-        result = (*query_result.first).rightmost.anchor;
+        result = (*query_result.first).rightmost->anchor;
 
     return result;
 }
@@ -278,7 +284,7 @@ typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::node_ptr
         // if sibling found, descend second children until value
         if ((sibling != nullptr) && (sibling != next))
         {
-            next = get_rightmost_leaf(sibling);
+            next = get_rightmost_leaf(key, sibling);
             break;
         }
 

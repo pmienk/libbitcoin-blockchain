@@ -17,58 +17,52 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_STORE_HPP
+#ifndef LIBBITCOIN_TRANSACTION_INDEX_DATA_HPP
+#define LIBBITCOIN_TRANSACTION_INDEX_DATA_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
-#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
+#include <bitcoin/blockchain/database/revised/index_data.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-/**
- * Stores transactions.
- * Lookup possible by file offset.
- */
-class BCB_API transaction_store
+class BCB_API transaction_index_data : public index_data
 {
 public:
-    transaction_store(const boost::filesystem::path& filename);
+    transaction_index_data();
 
-    /**
-     * Initialize a new transaction database.
-     */
-    void create();
+    transaction_index_data(uint8_t chain_id,
+        simple_allocator::position_type offset);
 
-    /**
-     * You must call start() before using the database.
-     */
-    void start();
+    transaction_index_data(const transaction_index_data& other);
 
-    /**
-     * Fetch transaction by offset.
-     */
-    transaction_result get(const simple_allocator::position_type offset) const;
+    ~transaction_index_data();
 
-    /**
-     * Store a transaction in the database.
-     */
-    simple_allocator::position_type store(
-        const chain::transaction& transaction);
+    simple_allocator::position_type offset() const;
 
-    /**
-     * Synchronize storage with disk so things are consistent.
-     * Should be done at the end of every write, including those result actions
-     * which modify data.
-     */
-    void sync();
+//    void offset(simple_allocator::position_type value);
+
+    uint32_t input_count() const;
+
+    void input_count(uint32_t count);
+
+    uint32_t output_count() const;
+
+    void output_count(uint32_t count);
+
+    hash_digest spender(uint32_t output_index) const;
+
+    bool spender(uint32_t output_index, const hash_digest& hash) const;
+
+    bool operator>(const transaction_index_data& other) const;
 
 private:
-    mmfile file_;
-    simple_allocator allocator_;
+    simple_allocator::position_type offset_;
+    uint32_t input_count_;
+    uint32_t output_count_;
+    hash_digest* output_spender_;
 };
 
 } // namespace revised_database

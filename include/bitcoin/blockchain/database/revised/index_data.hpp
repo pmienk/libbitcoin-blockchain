@@ -17,58 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_STORE_HPP
+#ifndef LIBBITCOIN_INDEX_DATA_HPP
+#define LIBBITCOIN_INDEX_DATA_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
 #include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
-#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-/**
- * Stores transactions.
- * Lookup possible by file offset.
- */
-class BCB_API transaction_store
+class BCB_API index_data
 {
 public:
-    transaction_store(const boost::filesystem::path& filename);
+    index_data();
 
-    /**
-     * Initialize a new transaction database.
-     */
-    void create();
+    index_data(uint8_t chain_id);
 
-    /**
-     * You must call start() before using the database.
-     */
-    void start();
+    ~index_data();
 
-    /**
-     * Fetch transaction by offset.
-     */
-    transaction_result get(const simple_allocator::position_type offset) const;
+    uint8_t chain_id() const;
 
-    /**
-     * Store a transaction in the database.
-     */
-    simple_allocator::position_type store(
-        const chain::transaction& transaction);
-
-    /**
-     * Synchronize storage with disk so things are consistent.
-     * Should be done at the end of every write, including those result actions
-     * which modify data.
-     */
-    void sync();
+    void chain_id(uint8_t id);
 
 private:
-    mmfile file_;
-    simple_allocator allocator_;
+    uint8_t chain_id_;
 };
 
 } // namespace revised_database

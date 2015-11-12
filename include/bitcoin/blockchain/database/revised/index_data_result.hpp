@@ -17,62 +17,62 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_STORE_HPP
+#ifndef LIBBITCOIN_INDEX_DATA_RESULT_HPP
+#define LIBBITCOIN_INDEX_DATA_RESULT_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/simple_allocator.hpp>
-#include <bitcoin/blockchain/database/revised/transaction_result.hpp>
+#include <bitcoin/blockchain/trie/modified_patricia_trie.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
 /**
- * Stores transactions.
- * Lookup possible by file offset.
+ * Index of transactions.
+ * Used to resolve offsets from hashes.
  */
-class BCB_API transaction_store
+template<typename IndexData>
+class index_data_result
 {
 public:
-    transaction_store(const boost::filesystem::path& filename);
+    typedef IndexData index_data_type;
 
-    /**
-     * Initialize a new transaction database.
-     */
-    void create();
+    typedef typename modified_patricia_trie<uint32_t,
+        index_data_type>::iterator iterator_source;
 
-    /**
-     * You must call start() before using the database.
-     */
-    void start();
+    typedef index_data_result<index_data_type> iter_type;
 
-    /**
-     * Fetch transaction by offset.
-     */
-    transaction_result get(const simple_allocator::position_type offset) const;
+public:
+    index_data_result(iterator_source& source);
 
-    /**
-     * Store a transaction in the database.
-     */
-    simple_allocator::position_type store(
-        const chain::transaction& transaction);
+    ~index_data_result();
 
-    /**
-     * Synchronize storage with disk so things are consistent.
-     * Should be done at the end of every write, including those result actions
-     * which modify data.
-     */
-    void sync();
+    operator bool() const;
+
+    typename iterator_source::reference data() const;
+
+    // iterator methods
+    bool operator==(const iter_type& other) const;
+
+    bool operator!=(const iter_type& other) const;
+
+    iter_type& operator++();
+
+    iter_type operator++(int);
+
+    iter_type& operator--();
+
+    iter_type operator--(int);
 
 private:
-    mmfile file_;
-    simple_allocator allocator_;
+    iterator_source source_;
 };
 
 } // namespace revised_database
 } // namespace blockchain
 } // namespace libbitcoin
+
+#include <bitcoin/blockchain/impl/database/revised/index_data_result.ipp>
 
 #endif

@@ -39,7 +39,7 @@ namespace blockchain {
 // prefix_query_result implementation
 template <typename Key, typename Value, typename Comparer>
 prefix_query_result<Key, Value, Comparer>::prefix_query_result()
-    : node_(nullptr)
+    : node_(nullptr), terminal_()
 {
 }
 
