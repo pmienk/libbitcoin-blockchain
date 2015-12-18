@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_INDEX_STORE_HPP
-#define LIBBITCOIN_INDEX_STORE_HPP
+#ifndef LIBBITCOIN_PREFIX_QUERYABLE_INDEX_STORE_HPP
+#define LIBBITCOIN_PREFIX_QUERYABLE_INDEX_STORE_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
@@ -35,7 +35,7 @@ namespace revised_database {
  * Used to resolve offsets from hashes.
  */
 template<typename IndexData>
-class index_store
+class prefix_queryable_index_store
 {
 public:
     typedef IndexData index_data_type;
@@ -48,24 +48,22 @@ public:
     typedef index_data_result<index_data_type> index_data_result_type;
 
 public:
-    index_store();
+    prefix_queryable_index_store();
 
-    ~index_store();
+    ~prefix_queryable_index_store();
 
     void create();
 
     void start();
 
-    index_prefix_query_result_type get(const hash_digest& hash) const;
-
-    index_prefix_query_result_type get(const binary_type& prefix) const;
+    index_prefix_query_result_type get_prefix(const binary_type& prefix) const;
 
     bool remove_equal(const binary_type& primary,
         const secondary_key_type& secondary);
 
     bool remove_equal(const secondary_key_type& secondary);
 
-    index_data_result_type remove_value(index_data_result_type it);
+    index_data_result_type remove_value(index_data_result_type& it);
 
     void sync();
 
@@ -77,6 +75,6 @@ protected:
 } // namespace blockchain
 } // namespace libbitcoin
 
-#include <bitcoin/blockchain/impl/database/revised/index_store.ipp>
+#include <bitcoin/blockchain/impl/database/revised/prefix_queryable_index_store.ipp>
 
 #endif

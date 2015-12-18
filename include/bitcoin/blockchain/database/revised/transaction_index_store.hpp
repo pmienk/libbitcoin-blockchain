@@ -22,7 +22,7 @@
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/index_store.hpp>
+#include <bitcoin/blockchain/database/revised/prefix_queryable_index_store.hpp>
 #include <bitcoin/blockchain/database/revised/transaction_index_data.hpp>
 
 namespace libbitcoin {
@@ -34,12 +34,14 @@ namespace revised_database {
  * Used to resolve offsets from hashes.
  */
 class BCB_API transaction_index_store
-    : public index_store<transaction_index_data>
+    : public prefix_queryable_index_store<transaction_index_data>
 {
 public:
     transaction_index_store();
 
     ~transaction_index_store();
+
+    index_prefix_query_result_type get(const hash_digest& hash) const;
 
     /**
      * Store transaction data in the database.

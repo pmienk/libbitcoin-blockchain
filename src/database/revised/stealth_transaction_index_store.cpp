@@ -25,8 +25,17 @@ namespace blockchain {
 namespace revised_database {
 
 stealth_transaction_index_store::stealth_transaction_index_store()
-    : index_store()
+    : prefix_queryable_index_store()
 {
+}
+
+stealth_transaction_index_store::index_prefix_query_result_type
+    stealth_transaction_index_store::get(const uint32_t prefix) const
+{
+    binary_type prefix_binary(sizeof(uint32_t) * byte_bits,
+        to_little_endian(prefix));
+
+    return get_prefix(prefix_binary);
 }
 
 stealth_transaction_index_store::~stealth_transaction_index_store()

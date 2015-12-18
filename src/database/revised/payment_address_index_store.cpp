@@ -25,12 +25,20 @@ namespace blockchain {
 namespace revised_database {
 
 payment_address_index_store::payment_address_index_store()
-    : index_store()
+    : prefix_queryable_index_store()
 {
 }
 
 payment_address_index_store::~payment_address_index_store()
 {
+}
+
+payment_address_index_store::index_prefix_query_result_type
+    payment_address_index_store::get(const short_hash& address) const
+{
+    binary_type prefix(short_hash_size * byte_bits, address);
+
+    return get_prefix(prefix);
 }
 
 payment_address_index_store::index_data_result_type

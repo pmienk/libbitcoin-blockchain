@@ -30,15 +30,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef LIBBITCOIN_INDEX_STORE_IPP
-#define LIBBITCOIN_INDEX_STORE_IPP
+#ifndef LIBBITCOIN_PREFIX_QUERYABLE_INDEX_STORE_IPP
+#define LIBBITCOIN_PREFIX_QUERYABLE_INDEX_STORE_IPP
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
 template<typename IndexData>
-index_store<IndexData>::index_store()
+prefix_queryable_index_store<IndexData>::prefix_queryable_index_store()
     : trie_(
         typename modified_patricia_trie<uint32_t, index_data_type>::structure_node_allocator(),
         typename modified_patricia_trie<uint32_t, index_data_type>::value_node_allocator())
@@ -46,63 +46,54 @@ index_store<IndexData>::index_store()
 }
 
 template<typename IndexData>
-index_store<IndexData>::~index_store()
+prefix_queryable_index_store<IndexData>::~prefix_queryable_index_store()
 {
 }
 
 template<typename IndexData>
-void index_store<IndexData>::create()
+void prefix_queryable_index_store<IndexData>::create()
 {
 }
 
 template<typename IndexData>
-void index_store<IndexData>::start()
+void prefix_queryable_index_store<IndexData>::start()
 {
 }
 
 template<typename IndexData>
-typename index_store<IndexData>::index_prefix_query_result_type
-    index_store<IndexData>::get(const hash_digest& hash) const
-{
-    binary_type prefix(hash_size, hash);
-    return get(prefix);
-}
-
-template<typename IndexData>
-typename index_store<IndexData>::index_prefix_query_result_type
-    index_store<IndexData>::get(const binary_type& prefix) const
+typename prefix_queryable_index_store<IndexData>::index_prefix_query_result_type
+    prefix_queryable_index_store<IndexData>::get_prefix(
+        const binary_type& prefix) const
 {
     auto result = trie_.find_prefixed(prefix);
-
-    if (result.second)
-        return (index_prefix_query_result_type)(result.first);
-
-    return index_prefix_query_result_type();
+    return index_prefix_query_result_type(result);
 }
 
 template<typename IndexData>
-bool index_store<IndexData>::remove_equal(const binary_type& primary,
-    const secondary_key_type& secondary)
+bool prefix_queryable_index_store<IndexData>::remove_equal(
+    const binary_type& primary, const secondary_key_type& secondary)
 {
     return trie_.remove_equal(primary, secondary);
 }
 
 template<typename IndexData>
-bool index_store<IndexData>::remove_equal(const secondary_key_type& secondary)
+bool prefix_queryable_index_store<IndexData>::remove_equal(
+    const secondary_key_type& secondary)
 {
     return trie_.remove_equal(secondary);
 }
 
 template<typename IndexData>
-typename index_store<IndexData>::index_data_result_type
-    index_store<IndexData>::remove_value(index_data_result_type it)
+typename prefix_queryable_index_store<IndexData>::index_data_result_type
+    prefix_queryable_index_store<IndexData>::remove_value(
+        index_data_result_type& it)
 {
     auto next = trie_.remove_value(it.source_);
     return (index_data_result_type)(next);
 }
 
 template<typename IndexData>
-void index_store<IndexData>::sync()
+void prefix_queryable_index_store<IndexData>::sync()
 {
 }
 

@@ -564,7 +564,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_node_size
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_closest_subkey_matching_node(
-        structure_node_type* start, const binary_type& key)
+        structure_node_type* start, const binary_type& key) const
 {
     auto match = true;
     auto current = start;
@@ -603,7 +603,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_node_size
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_equal(
-        const binary_type& primary)
+        const binary_type& primary) const
 {
     auto find_pair = find_closest_subkey_matching_node(root_, primary);
     bool failure =  (find_pair.second == 0) || (find_pair.first == nullptr) ||
@@ -615,7 +615,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_equal(
-        const binary_type& primary, const secondary_key_type& secondary)
+        const binary_type& primary, const secondary_key_type& secondary) const
 {
     auto primary_key_query_result = find_equal(primary);
 
@@ -628,7 +628,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_prefixed(
-        const binary_type& primary)
+        const binary_type& primary) const
 {
     auto find_pair = find_closest_subkey_matching_node(root_, primary);
     bool failure =  (find_pair.second == 0) || (find_pair.first == nullptr);
@@ -639,7 +639,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_prefixed(
-        const binary_type& primary, const secondary_key_type& secondary)
+        const binary_type& primary, const secondary_key_type& secondary) const
 {
     auto primary_key_query_result = find_prefixed(primary);
 
@@ -652,7 +652,7 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
 template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_secondary_key_bounds(
-        const secondary_key_type& key)
+        const secondary_key_type& key) const
 {
     auto result = query_result(root_);
     return result.get_prefixed(key);

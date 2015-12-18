@@ -17,45 +17,46 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_INDEX_DATA_RESULT_HPP
-#define LIBBITCOIN_INDEX_DATA_RESULT_HPP
+#ifndef LIBBITCOIN_HASHED_INDEX_DATA_RESULT_HPP
+#define LIBBITCOIN_HASHED_INDEX_DATA_RESULT_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/trie/modified_patricia_trie.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-template<typename IndexData>
-class prefix_queryable_index_store;
-
 /**
  * Index of transactions.
  * Used to resolve offsets from hashes.
  */
-template<typename IndexData>
-class index_data_result
+template<typename Index>
+class hashed_index_data_result
 {
 public:
-    friend class prefix_queryable_index_store<IndexData>;
+    typedef Index index_type;
 
-    typedef IndexData index_data_type;
+    typedef typename index_type::value_type index_data_type;
 
-    typedef typename modified_patricia_trie<uint32_t,
-        index_data_type>::iterator iterator_source;
+    typedef typename index_type::iterator iterator_source;
 
-    typedef index_data_result<index_data_type> iter_type;
+    typedef hashed_index_data_result<index_type> iter_type;
+
+    typedef std::function<void (index_data_type&)> data_modifier;
 
 public:
-    index_data_result(iterator_source& source);
+    hashed_index_data_result(index_type& index, iterator_source source);
 
-    ~index_data_result();
+    ~hashed_index_data_result();
 
     operator bool() const;
 
-    typename iterator_source::reference data() const;
+    const index_data_type& data() const;
+
+    iterator_source source() const;
+
+    bool modify(data_modifier mod);
 
     // iterator methods
     bool operator==(const iter_type& other) const;
@@ -71,6 +72,17 @@ public:
     iter_type operator--(int);
 
 private:
+    struct data_modifier_functor
+    {
+        data_modifier modifier;
+
+        void operator()(index_data_type& x)const
+        {
+            modifier(x);
+        }
+    };
+
+    index_type& index_;
     iterator_source source_;
 };
 
@@ -78,6 +90,6 @@ private:
 } // namespace blockchain
 } // namespace libbitcoin
 
-#include <bitcoin/blockchain/impl/database/revised/index_data_result.ipp>
+#include <bitcoin/blockchain/impl/database/revised/hashed_index_data_result.ipp>
 
 #endif

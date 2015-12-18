@@ -98,14 +98,14 @@ void transaction_index_data::output_count(uint32_t count)
         {
             output_spender_ = new hash_digest[count];
 
-            auto bound = (count < output_count_) ? output_count_ : count;
-
             for (uint32_t i = 0; i < count; i++)
-                output_spender_[i] = (i < bound) ? previous[i] : null_hash;
+                output_spender_[i] = (i < output_count_) ? previous[i] : null_hash;
         }
 
         output_count_ = count;
-        delete [] previous;
+
+        if (previous != nullptr)
+            delete [] previous;
     }
 }
 

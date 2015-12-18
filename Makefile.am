@@ -59,6 +59,7 @@ src_libbitcoin_blockchain_la_SOURCES = \
     src/database/transaction_database.cpp \
     src/database/mman-win32/mman.c \
     src/database/mman-win32/mman.h \
+    src/database/revised/block_index_store.cpp \
     src/database/revised/header_result.cpp \
     src/database/revised/header_store.cpp \
     src/database/revised/index_data.cpp \
@@ -95,6 +96,10 @@ test_libbitcoin_blockchain_test_SOURCES = \
     test/main.cpp \
     test/transaction_pool.cpp \
     test/validate_block.cpp \
+    test/database/block_index_store.cpp \
+    test/database/payment_address_index_store.cpp \
+    test/database/stealth_transaction_index_store.cpp \
+    test/database/transaction_index_store.cpp \
     test/tree/red_black_store.cpp \
     test/tree/red_black_tree.cpp \
     test/trie/modified_patricia_trie.cpp
@@ -346,15 +351,17 @@ include_bitcoin_blockchain_database_HEADERS = \
 
 include_bitcoin_blockchain_database_reviseddir = ${includedir}/bitcoin/blockchain/database/revised
 include_bitcoin_blockchain_database_revised_HEADERS = \
+    include/bitcoin/blockchain/database/revised/block_index_store.hpp \
+    include/bitcoin/blockchain/database/revised/hashed_index_data_result.hpp \
     include/bitcoin/blockchain/database/revised/header_result.hpp \
     include/bitcoin/blockchain/database/revised/header_store.hpp \
     include/bitcoin/blockchain/database/revised/index_data.hpp \
     include/bitcoin/blockchain/database/revised/index_data_result.hpp \
     include/bitcoin/blockchain/database/revised/index_prefix_query_result.hpp \
-    include/bitcoin/blockchain/database/revised/index_store.hpp \
     include/bitcoin/blockchain/database/revised/merkle_tree_result.hpp \
     include/bitcoin/blockchain/database/revised/merkle_tree_store.hpp \
     include/bitcoin/blockchain/database/revised/payment_address_index_store.hpp \
+    include/bitcoin/blockchain/database/revised/prefix_queryable_index_store.hpp \
     include/bitcoin/blockchain/database/revised/simple_allocator.hpp \
     include/bitcoin/blockchain/database/revised/simple_transaction_index_data.hpp \
     include/bitcoin/blockchain/database/revised/stealth_transaction_index_store.hpp \
@@ -376,9 +383,10 @@ include_bitcoin_blockchain_impl_HEADERS = \
 
 include_bitcoin_blockchain_impl_database_reviseddir = ${includedir}/bitcoin/blockchain/impl/database/revised
 include_bitcoin_blockchain_impl_database_revised_HEADERS = \
+    include/bitcoin/blockchain/impl/database/revised/hashed_index_data_result.ipp \
     include/bitcoin/blockchain/impl/database/revised/index_data_result.ipp \
     include/bitcoin/blockchain/impl/database/revised/index_prefix_query_result.ipp \
-    include/bitcoin/blockchain/impl/database/revised/index_store.ipp
+    include/bitcoin/blockchain/impl/database/revised/prefix_queryable_index_store.ipp
 
 include_bitcoin_blockchain_impl_treedir = ${includedir}/bitcoin/blockchain/impl/tree
 include_bitcoin_blockchain_impl_tree_HEADERS = \

@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TRANSACTION_INDEX_STORE_HPP
-#define LIBBITCOIN_TRANSACTION_INDEX_STORE_HPP
+#ifndef LIBBITCOIN_STEALTH_TRANSACTION_INDEX_STORE_HPP
+#define LIBBITCOIN_STEALTH_TRANSACTION_INDEX_STORE_HPP
 
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
-#include <bitcoin/blockchain/database/revised/index_store.hpp>
+#include <bitcoin/blockchain/database/revised/prefix_queryable_index_store.hpp>
 #include <bitcoin/blockchain/database/revised/simple_transaction_index_data.hpp>
 
 namespace libbitcoin {
@@ -34,12 +34,14 @@ namespace revised_database {
  * Used to resolve offsets from hashes.
  */
 class BCB_API stealth_transaction_index_store
-    : public index_store<simple_transaction_index_data>
+    : public prefix_queryable_index_store<simple_transaction_index_data>
 {
 public:
     stealth_transaction_index_store();
 
     ~stealth_transaction_index_store();
+
+    index_prefix_query_result_type get(const uint32_t prefix) const;
 
     /**
      * Store transaction data in the database.

@@ -107,17 +107,17 @@ public:
     // lookup
     // results will share a primary key
     iterator_range find_equal(const binary_type& primary,
-        const secondary_key_type& secondary);
+        const secondary_key_type& secondary) const;
 
-    pair_query_result_bool find_equal(const binary_type& primary);
+    pair_query_result_bool find_equal(const binary_type& primary) const;
 
     // results will span primary keys with matching prefix
     iterator_range find_prefixed(const binary_type& primary,
-        const secondary_key_type& secondary);
+        const secondary_key_type& secondary) const;
 
-    pair_query_result_bool find_prefixed(const binary_type& primary);
+    pair_query_result_bool find_prefixed(const binary_type& primary) const;
 
-    iterator_range find_secondary_key_bounds(const secondary_key_type& key);
+    iterator_range find_secondary_key_bounds(const secondary_key_type& key) const;
 
     // deletion
     bool remove_equal(const binary_type& primary,
@@ -188,7 +188,7 @@ protected:
     void attach_child(structure_node_type* parent, structure_node_type* child);
 
     pair_node_size find_closest_subkey_matching_node(
-        structure_node_type* start, const binary_type& key);
+        structure_node_type* start, const binary_type& key) const;
 
 private:
 

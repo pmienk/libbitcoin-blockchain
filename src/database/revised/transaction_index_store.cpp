@@ -25,12 +25,19 @@ namespace blockchain {
 namespace revised_database {
 
 transaction_index_store::transaction_index_store()
-    : index_store()
+    : prefix_queryable_index_store()
 {
 }
 
 transaction_index_store::~transaction_index_store()
 {
+}
+
+transaction_index_store::index_prefix_query_result_type
+    transaction_index_store::get(const hash_digest& hash) const
+{
+    binary_type prefix(hash_size, hash);
+    return get_prefix(prefix);
 }
 
 transaction_index_store::index_data_result_type
