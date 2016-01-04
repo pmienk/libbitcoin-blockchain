@@ -34,7 +34,7 @@ namespace revised_database {
  * Used to resolve offsets from hashes.
  */
 class BCB_API payment_address_index_store
-    : public prefix_queryable_index_store<simple_transaction_index_data>
+    : public prefix_queryable_index_store<short_hash_size * byte_bits, simple_transaction_index_data>
 {
 public:
     payment_address_index_store();

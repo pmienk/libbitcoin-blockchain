@@ -32,9 +32,11 @@ struct insert_status
     bool status;
 };
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename Trie = modified_patricia_trie<
+        Size,
         Key,
         Value,
         std::greater<Key>,
@@ -61,9 +63,11 @@ static std::vector<insert_status<Trie>> insert_equal(Trie& tree,
     return result;
 }
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename Trie = modified_patricia_trie<
+        Size,
         Key,
         Value,
         std::greater<Key>,
@@ -73,7 +77,7 @@ template<typename Key,
 static void test_insert_equal_with_unique_keys_succeeds(
     Trie& tree, std::vector<std::tuple<Value, Key, binary_type>>& value_key_tuples)
 {
-    insert_equal(tree, value_key_tuples);
+    insert_equal<Size, Key, Value, Trie>(tree, value_key_tuples);
 
     // find
     for (auto query : value_key_tuples)
@@ -90,9 +94,11 @@ static void test_insert_equal_with_unique_keys_succeeds(
     }
 }
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename Trie = modified_patricia_trie<
+        Size,
         Key,
         Value,
         std::greater<Key>,
@@ -145,9 +151,11 @@ static void test_insert_unique_matches_expectation(Trie& tree,
     }
 }
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename Trie = modified_patricia_trie<
+        Size,
         Key,
         Value,
         std::greater<Key>,
@@ -172,9 +180,11 @@ static void verify_iterator_range(std::vector<Value>& expected,
     BOOST_REQUIRE(actual_it == range.second);
 }
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename Trie = modified_patricia_trie<
+        Size,
         Key,
         Value,
         std::greater<Key>,
@@ -239,7 +249,7 @@ BOOST_AUTO_TEST_CASE(constructor_allocator_args)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t>* tree= new modified_patricia_trie<uint32_t, uint32_t>(
+    modified_patricia_trie<32, uint32_t, uint32_t>* tree= new modified_patricia_trie<32, uint32_t, uint32_t>(
         alloc_pair.first, alloc_pair.second);
 
     delete tree;
@@ -254,10 +264,37 @@ BOOST_AUTO_TEST_CASE(insert_equal_zero_length_key_fails)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first,
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first,
         alloc_pair.second);
 
     binary_type primary(0, bc::data_chunk {});
+    uint32_t secondary = 2;
+    uint32_t value = 17;
+
+    auto insert_result = tree.insert_equal(primary, secondary, value);
+
+    BOOST_REQUIRE(!insert_result.second);
+
+    auto find_result = tree.find_equal(primary, secondary);
+
+    BOOST_REQUIRE(find_result.first == find_result.second);
+}
+
+BOOST_AUTO_TEST_CASE(insert_equal_key_length_exceeds_size_fails)
+{
+    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first,
+        alloc_pair.second);
+
+    binary_type primary(40, bc::data_chunk {
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1
+    });
+
     uint32_t secondary = 2;
     uint32_t value = 17;
 
@@ -274,7 +311,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_nonzero_length_key_succeeds)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     binary_type key(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
     int value = 17;
@@ -297,7 +334,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_multiple_same_key_succeeds)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first,
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first,
         alloc_pair.second);
 
     binary_type primary(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
@@ -334,7 +371,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_leaf_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -342,14 +379,14 @@ BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_leaf_node)
         std::make_tuple(17,  1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_equal_with_unique_keys_succeeds(tree, value_key_tuples);
+    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_intermediary_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -357,14 +394,14 @@ BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_intermediary_node)
         std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_equal_with_unique_keys_succeeds(tree, value_key_tuples);
+    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_match_existing_intermediary_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -373,14 +410,14 @@ BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_match_existing_intermediar
         std::make_tuple(26,  1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_equal_with_unique_keys_succeeds(tree, value_key_tuples);
+    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_multiple_unique_keys)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -393,14 +430,14 @@ BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_multiple_unique_keys)
         std::make_tuple(234, 1,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
     };
 
-    test_insert_equal_with_unique_keys_succeeds(tree, value_key_tuples);
+    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_equal_multiple_unique_keys)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -413,7 +450,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_multiple_unique_keys)
         std::make_tuple(234, 2,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
     };
 
-    test_insert_equal_with_unique_keys_succeeds(tree, value_key_tuples);
+    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
 }
 
 //
@@ -423,10 +460,37 @@ BOOST_AUTO_TEST_CASE(insert_unique_zero_length_key_fails)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     binary_type primary(0, bc::data_chunk {});
     uint32_t secondary = 10;
+    uint32_t value = 17;
+
+    auto insert_result = tree.insert_unique(primary, secondary, value);
+
+    BOOST_REQUIRE(!insert_result.second);
+
+    auto find_result = tree.find_equal(primary, secondary);
+
+    BOOST_REQUIRE(find_result.first == find_result.second);
+}
+
+BOOST_AUTO_TEST_CASE(insert_unique_key_length_exceeds_size_fails)
+{
+    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first,
+        alloc_pair.second);
+
+    binary_type primary(40, bc::data_chunk {
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1
+    });
+
+    uint32_t secondary = 2;
     uint32_t value = 17;
 
     auto insert_result = tree.insert_unique(primary, secondary, value);
@@ -442,21 +506,21 @@ BOOST_AUTO_TEST_CASE(insert_unique_collision_returns_error)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
         std::make_tuple(false,  112,    1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_unique_matches_expectation(tree, value_key_tuples);
+    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_leaf_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -464,14 +528,14 @@ BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_leaf_node)
         std::make_tuple(true,   17,     1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_unique_matches_expectation(tree, value_key_tuples);
+    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_intermediary_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -479,14 +543,14 @@ BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_intermediary_node)
         std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_unique_matches_expectation(tree, value_key_tuples);
+    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
 }
 
 BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_match_existing_intermediary_node)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -495,7 +559,7 @@ BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_match_existing_intermedia
         std::make_tuple(true,   26,     1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    test_insert_unique_matches_expectation(tree, value_key_tuples);
+    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
 }
 
 //
@@ -505,7 +569,7 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_none)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -514,7 +578,7 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_none)
         std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    insert_equal(tree, value_key_tuples);
+    insert_equal<32>(tree, value_key_tuples);
 
     binary_type primary(8, bc::data_chunk { 0xBB });
     uint32_t secondary = 1;
@@ -528,7 +592,7 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_all)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -541,20 +605,20 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_all)
 
     std::vector<uint32_t> expected = { 97, 26, 112, 17 };
 
-    insert_equal(tree, value_key_tuples);
+    insert_equal<32>(tree, value_key_tuples);
 
     auto query_result = tree.find_prefixed(query, 1);
 
     BOOST_REQUIRE(query_result.first != query_result.second);
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, query_result);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, query_result);
 }
 
 BOOST_AUTO_TEST_CASE(find_prefix_matches_returns_subset)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
         std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
@@ -567,13 +631,13 @@ BOOST_AUTO_TEST_CASE(find_prefix_matches_returns_subset)
 
     std::vector<uint32_t> expected = { 26, 112 };
 
-    insert_equal(tree, value_key_tuples);
+    insert_equal<32>(tree, value_key_tuples);
 
     auto query_result = tree.find_prefixed(query, 1);
 
     BOOST_REQUIRE(query_result.first != query_result.second);
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, query_result);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, query_result);
 }
 
 //
@@ -583,7 +647,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_empty_tree)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     binary_type primary(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
     uint32_t secondary = 1;
@@ -605,9 +669,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_zero_length_returns_false)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(primary, secondary);
 
@@ -615,7 +679,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_zero_length_returns_false)
 
     auto range = tree.find_secondary_key_bounds(secondary);
 
-    verify_iterator_range<uint32_t, uint32_t>(value_key_tuples, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(value_key_tuples, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_key_not_present_returns_false)
@@ -630,9 +694,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_not_present_returns_false)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(primary, secondary);
 
@@ -640,7 +704,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_not_present_returns_false)
 
     auto range = tree.find_secondary_key_bounds(secondary);
 
-    verify_iterator_range<uint32_t, uint32_t>(value_key_tuples, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(value_key_tuples, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_of_root_with_single_value)
@@ -652,9 +716,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_of_root_with_single_value)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
         std::get<1>(value_key_tuples[0]));
@@ -666,7 +730,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_of_root_with_single_value)
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
         ++(value_key_tuples.begin()), value_key_tuples.end());
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_with_multiple_values)
@@ -679,9 +743,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_with_multiple_values)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
         std::get<1>(value_key_tuples[0]));
@@ -693,7 +757,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_with_multiple_values)
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
         ++(++(value_key_tuples.begin())), value_key_tuples.end());
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
@@ -708,9 +772,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
         std::get<1>(value_key_tuples[0]));
@@ -726,7 +790,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
         std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_single_key_multiply_inserted)
@@ -741,9 +805,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_single_key_multiply_inserted)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
         std::get<1>(value_key_tuples[0]));
@@ -758,7 +822,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_single_key_multiply_inserted)
         std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
@@ -773,9 +837,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
         std::get<1>(value_key_tuples[0]));
@@ -789,7 +853,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
         std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected_1, range_1);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
 
     auto range_2 = tree.find_secondary_key_bounds(2);
 
@@ -798,7 +862,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
         std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected_2, range_2);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
@@ -814,9 +878,9 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     bool success = tree.remove_equal(std::get<2>(value_key_tuples[3]),
         std::get<1>(value_key_tuples[3]));
@@ -831,7 +895,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
         std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected_1, range_1);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
 
     auto range_2 = tree.find_secondary_key_bounds(2);
 
@@ -840,7 +904,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
         std::make_tuple(59,  2, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected_2, range_2);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
 }
 
 //
@@ -850,7 +914,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_empty_tree)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     uint32_t secondary = 1;
 
@@ -872,9 +936,9 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_empty_secondary_key)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     BOOST_REQUIRE(!tree.remove_equal(secondary));
 
@@ -889,7 +953,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_empty_secondary_key)
         std::make_tuple(59,  1, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
 BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_single_secondary_key_empties_tree)
@@ -907,9 +971,9 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_single_secondary_key_empti
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     BOOST_REQUIRE(tree.remove_equal(secondary));
 
@@ -922,7 +986,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     uint32_t secondary = 1;
 
@@ -942,7 +1006,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -950,7 +1014,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    auto range = std::make_pair(tree.begin(), tree.end());
 //
-//    verify_iterator_range<uint32_t, uint32_t><uint32_t, uint32_t, std::less<int>>(value_key_tuples, range);
+//    verify_iterator_range<32, uint32_t, uint32_t><uint32_t, uint32_t, std::less<int>>(value_key_tuples, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_key_not_present_returns_false)
@@ -966,7 +1030,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -974,7 +1038,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    auto range = std::make_pair(tree.begin(), tree.end());
 //
-//    verify_iterator_range<uint32_t, uint32_t>(value_key_tuples, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(value_key_tuples, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_single_matching_key)
@@ -988,7 +1052,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(value_key_tuples[0].second);
 //
@@ -1000,7 +1064,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_single_matching_prefix)
@@ -1016,7 +1080,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -1028,7 +1092,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_single_node_matching_key_with_multiplicity)
@@ -1044,7 +1108,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(value_key_tuples[0].second);
 //
@@ -1056,7 +1120,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_single_node_matching_prefix_with_multiplicity)
@@ -1074,7 +1138,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -1086,7 +1150,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_subtree_matching_key)
@@ -1104,7 +1168,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(value_key_tuples[0].second);
 //
@@ -1116,7 +1180,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_subtree_matching_prefix)
@@ -1137,7 +1201,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -1150,7 +1214,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(26,  binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_subtree_matching_key_with_multiplicity)
@@ -1174,7 +1238,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(value_key_tuples[0].second);
 //
@@ -1188,7 +1252,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(44,  binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCF }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 //
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_subtree_matching_prefix_with_multiplicity)
@@ -1215,7 +1279,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //
 //    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 //
-//    auto insert_results = insert_equal(tree, value_key_tuples);
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 //
 //    bool success = tree.remove_prefix(query);
 //
@@ -1230,7 +1294,7 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
 //        std::make_pair(44,  binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCF }))
 //    };
 //
-//    verify_iterator_range<uint32_t, uint32_t>(expected, range);
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 //}
 
 //
@@ -1240,7 +1304,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_empty_tree)
 {
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     auto range = tree.find_secondary_key_bounds(1);
 
@@ -1258,9 +1322,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_of_root_with_single_value)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     auto iterator = tree.remove_value(insert_results[0].pos);
 
@@ -1276,7 +1340,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_of_root_with_single_value)
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
             ++(value_key_tuples.begin()), value_key_tuples.end());
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, bounds);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
 }
 
 BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_head)
@@ -1291,9 +1355,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_head)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     auto iterator = tree.remove_value(insert_results[0].pos);
 
@@ -1306,7 +1370,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_head)
         std::make_tuple(523, secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, bounds);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
 }
 
 BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
@@ -1321,9 +1385,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     auto iterator = tree.remove_value(insert_results[1].pos);
 
@@ -1336,7 +1400,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
         std::make_tuple(17,  secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, bounds);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
 }
 
 BOOST_AUTO_TEST_CASE(remove_value_from_unique_key)
@@ -1351,9 +1415,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_unique_key)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     auto iterator = tree.remove_value(insert_results[0].pos);
 
@@ -1369,7 +1433,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_unique_key)
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
         ++(value_key_tuples.begin()), value_key_tuples.end());
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, bounds);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
 }
 
 BOOST_AUTO_TEST_CASE(remove_value_from_single_key_multiply_inserted)
@@ -1384,9 +1448,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_single_key_multiply_inserted)
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
 
-    modified_patricia_trie<uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    auto insert_results = insert_equal(tree, value_key_tuples);
+    auto insert_results = insert_equal<32>(tree, value_key_tuples);
 
     auto iterator = tree.remove_value(insert_results[1].pos);
 
@@ -1403,7 +1467,7 @@ BOOST_AUTO_TEST_CASE(remove_value_from_single_key_multiply_inserted)
         std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
     };
 
-    verify_iterator_range<uint32_t, uint32_t>(expected, bounds);
+    verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

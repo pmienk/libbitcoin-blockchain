@@ -39,8 +39,8 @@ namespace libbitcoin {
 namespace blockchain {
 
 // modified_patricia_trie implementation
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-modified_patricia_trie<K, V, KC, VC, SNA, VNA>::modified_patricia_trie(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::modified_patricia_trie(
     structure_node_allocator structure_allocator,
     value_node_allocator value_allocator)
     : structure_allocator_(structure_allocator),
@@ -49,14 +49,14 @@ modified_patricia_trie<K, V, KC, VC, SNA, VNA>::modified_patricia_trie(
 {
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-modified_patricia_trie<K, V, KC, VC, SNA, VNA>::~modified_patricia_trie()
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::~modified_patricia_trie()
 {
     destroy();
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy()
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::destroy()
 {
     auto current = get_leftmost_leaf(root_);
 
@@ -79,9 +79,9 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy()
     root_ = nullptr;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_structure_node()
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::create_structure_node()
 {
     auto node = structure_allocator_.allocate(1);
     if (node == nullptr)
@@ -91,9 +91,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_structure_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::create_structure_node(
         const binary_type& key)
 {
     auto node = create_structure_node();
@@ -101,9 +101,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_structure_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::create_structure_node(
         const binary_type& primary, const secondary_key_type& secondary,
         const value_type& value)
 {
@@ -113,8 +113,8 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy_structure_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::destroy_structure_node(
     structure_node_type* node)
 {
     auto result = false;
@@ -129,8 +129,8 @@ bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy_structure_node(
     return result;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
     structure_node_type* node)
 {
     if (node != nullptr)
@@ -152,8 +152,8 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
     }
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
     structure_node_type* node, const secondary_key_type& key)
 {
     if (node != nullptr)
@@ -177,9 +177,9 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::erase_values(
     }
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::compress_branch(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::compress_branch(
         structure_node_type* node, const secondary_key_type& key)
 {
     if (node != nullptr)
@@ -220,9 +220,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::create_value_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::create_value_node(
         const value_type& value)
 {
     auto* node = value_allocator_.allocate(1);
@@ -233,8 +233,8 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
     return node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy_value_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::destroy_value_node(
     value_node_type* node)
 {
     auto result = false;
@@ -248,9 +248,9 @@ bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::destroy_value_node(
     return result;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::append_value(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::append_value(
         structure_node_type* node, const secondary_key_type& key,
         value_node_type* value_node)
 {
@@ -300,9 +300,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
     return value_node;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::append_value(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::append_value(
         structure_node_type* node, const secondary_key_type& key,
         const value_type& value)
 {
@@ -310,9 +310,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::value_node_type*
     return append_value(node, key, value_node);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::get_leftmost_leaf(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::get_leftmost_leaf(
         structure_node_type* origin) const
 {
     auto* current = origin;
@@ -322,8 +322,8 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return current;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::update_left_and_right(
     structure_node_type* node, const secondary_key_type& key)
 {
     if (!node->has_children(key))
@@ -363,8 +363,8 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right(
     }
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right_branch(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::update_left_and_right_branch(
     structure_node_type* node, const secondary_key_type& key)
 {
     if (node != nullptr)
@@ -379,8 +379,8 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::update_left_and_right_branc
     }
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::attach_child(
     const secondary_key_type& key, structure_node_type* parent,
     structure_node_type* child)
 {
@@ -391,8 +391,8 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
         update_left_and_right_branch(child, key);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::attach_child(
     structure_node_type* parent, structure_node_type* child)
 {
     // note: method trusts that the parent's child is safely overwriteable
@@ -403,9 +403,9 @@ void modified_patricia_trie<K, V, KC, VC, SNA, VNA>::attach_child(
         update_left_and_right_branch(child, it.get_key());
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::insert_at(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::insert_at(
         structure_node_type* current, const binary_type& key)
 {
     auto host = create_structure_node(key);
@@ -413,9 +413,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return host;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::insert_at(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::insert_at(
         structure_node_type* current, const binary_type& primary,
         const secondary_key_type& secondary, const value_type& value)
 {
@@ -424,9 +424,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::structure_node_type*
     return host;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::insert(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::insert(
         structure_node_type*& current, const binary_type& primary,
         const secondary_key_type& secondary, const value_type& value)
 {
@@ -519,13 +519,18 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     return std::make_pair(iterator(secondary, current), false);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::insert_equal(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::insert_equal(
         const binary_type& primary, const secondary_key_type& secondary,
         const value_type& value)
 {
     auto current = root_;
+
+    // prevent insertion with primary key longer than size template parameter
+    if (primary.size() > S)
+        return std::make_pair(iterator(secondary, current), false);
+
     auto result = insert(current, primary, secondary, value);
 
     // if we haven't created a node yet, but exhausted our key
@@ -540,13 +545,18 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     return result;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::insert_unique(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::insert_unique(
         const binary_type& primary, const secondary_key_type& secondary,
         const value_type& value)
 {
     auto current = root_;
+
+    // prevent insertion with primary key longer than size template parameter
+    if (primary.size() > S)
+        return std::make_pair(iterator(secondary, current), false);
+
     auto result = insert(current, primary, secondary, value);
 
     // if we haven't created a node yet, but exhausted our key
@@ -561,9 +571,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     return result;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_node_size
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_closest_subkey_matching_node(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_node_size
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_closest_subkey_matching_node(
         structure_node_type* start, const binary_type& key) const
 {
     auto match = true;
@@ -600,9 +610,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_node_size
     return std::make_pair(current, key_offset);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_equal(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_query_result_bool
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_equal(
         const binary_type& primary) const
 {
     auto find_pair = find_closest_subkey_matching_node(root_, primary);
@@ -612,9 +622,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
     return std::make_pair(query_result(find_pair.first), !failure);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_equal(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator_range
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_equal(
         const binary_type& primary, const secondary_key_type& secondary) const
 {
     auto primary_key_query_result = find_equal(primary);
@@ -625,9 +635,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     return std::make_pair(end_, end_);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_prefixed(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_query_result_bool
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_prefixed(
         const binary_type& primary) const
 {
     auto find_pair = find_closest_subkey_matching_node(root_, primary);
@@ -636,9 +646,9 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::pair_query_result_bool
     return std::make_pair(query_result(find_pair.first), !failure);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_prefixed(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator_range
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_prefixed(
         const binary_type& primary, const secondary_key_type& secondary) const
 {
     auto primary_key_query_result = find_prefixed(primary);
@@ -649,17 +659,17 @@ typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
     return std::make_pair(end_, end_);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator_range
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::find_secondary_key_bounds(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator_range
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::find_secondary_key_bounds(
         const secondary_key_type& key) const
 {
     auto result = query_result(root_);
     return result.get_prefixed(key);
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::remove_equal(
     const binary_type& primary, const secondary_key_type& secondary)
 {
     auto find_pair = find_closest_subkey_matching_node(root_, primary);
@@ -676,8 +686,8 @@ bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
     return !nonremovable;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::remove_equal(
     const secondary_key_type& secondary)
 {
     bool removed = false;
@@ -698,9 +708,9 @@ bool modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_equal(
     return removed;
 }
 
-template <typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-typename modified_patricia_trie<K, V, KC, VC, SNA, VNA>::iterator
-    modified_patricia_trie<K, V, KC, VC, SNA, VNA>::remove_value(iterator it)
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::remove_value(iterator it)
 {
     auto value_node = it.value_node_;
     if (value_node == nullptr)

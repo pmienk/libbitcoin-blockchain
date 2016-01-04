@@ -33,6 +33,7 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_PRIMARY_PREFIXED_SECONDARY_ORDERED_PATRICIA_TRIE_HPP
 #define LIBBITCOIN_BLOCKCHAIN_PRIMARY_PREFIXED_SECONDARY_ORDERED_PATRICIA_TRIE_HPP
 
+#include <cstdint>
 #include <memory>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/utility.hpp>
@@ -45,7 +46,8 @@
 namespace libbitcoin {
 namespace blockchain {
 
-template <typename Key,
+template <std::size_t Size,
+    typename Key,
     typename Value,
     typename KeyComparer = std::greater<Key>,
     typename ValueComparer = std::greater<Value>,
@@ -65,7 +67,7 @@ public:
     typedef StructureNodeAllocator structure_node_allocator;
     typedef ValueNodeAllocator value_node_allocator;
 
-    typedef modified_patricia_trie<Key, Value,
+    typedef modified_patricia_trie<Size, Key, Value,
         KeyComparer, ValueComparer, StructureNodeAllocator,
         ValueNodeAllocator> trie_type;
 

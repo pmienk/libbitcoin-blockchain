@@ -34,18 +34,18 @@ namespace revised_database {
  * Index of transactions.
  * Used to resolve offsets from hashes.
  */
-template<typename IndexData>
+template<std::size_t Size, typename IndexData>
 class prefix_queryable_index_store
 {
 public:
     typedef IndexData index_data_type;
 
-    typedef typename modified_patricia_trie<uint32_t,
+    typedef typename modified_patricia_trie<Size, uint32_t,
         index_data_type>::secondary_key_type secondary_key_type;
 
-    typedef index_prefix_query_result<index_data_type> index_prefix_query_result_type;
+    typedef index_prefix_query_result<Size, index_data_type> index_prefix_query_result_type;
 
-    typedef index_data_result<index_data_type> index_data_result_type;
+    typedef index_data_result<Size, index_data_type> index_data_result_type;
 
 public:
     prefix_queryable_index_store();
@@ -68,7 +68,7 @@ public:
     void sync();
 
 protected:
-    modified_patricia_trie<uint32_t, index_data_type> trie_;
+    modified_patricia_trie<Size, uint32_t, index_data_type> trie_;
 };
 
 } // namespace revised_database

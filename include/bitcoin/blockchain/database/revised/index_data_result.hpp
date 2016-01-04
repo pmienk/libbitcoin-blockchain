@@ -28,25 +28,25 @@ namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-template<typename IndexData>
+template<std::size_t Size, typename IndexData>
 class prefix_queryable_index_store;
 
 /**
  * Index of transactions.
  * Used to resolve offsets from hashes.
  */
-template<typename IndexData>
+template<std::size_t Size, typename IndexData>
 class index_data_result
 {
 public:
-    friend class prefix_queryable_index_store<IndexData>;
+    friend class prefix_queryable_index_store<Size, IndexData>;
 
     typedef IndexData index_data_type;
 
-    typedef typename modified_patricia_trie<uint32_t,
+    typedef typename modified_patricia_trie<Size, uint32_t,
         index_data_type>::iterator iterator_source;
 
-    typedef index_data_result<index_data_type> iter_type;
+    typedef index_data_result<Size, index_data_type> iter_type;
 
 public:
     index_data_result(iterator_source& source);

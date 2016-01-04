@@ -37,63 +37,63 @@ namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-template<typename IndexData>
-prefix_queryable_index_store<IndexData>::prefix_queryable_index_store()
+template<std::size_t Size, typename IndexData>
+prefix_queryable_index_store<Size, IndexData>::prefix_queryable_index_store()
     : trie_(
-        typename modified_patricia_trie<uint32_t, index_data_type>::structure_node_allocator(),
-        typename modified_patricia_trie<uint32_t, index_data_type>::value_node_allocator())
+        typename modified_patricia_trie<Size, uint32_t, index_data_type>::structure_node_allocator(),
+        typename modified_patricia_trie<Size, uint32_t, index_data_type>::value_node_allocator())
 {
 }
 
-template<typename IndexData>
-prefix_queryable_index_store<IndexData>::~prefix_queryable_index_store()
+template<std::size_t Size, typename IndexData>
+prefix_queryable_index_store<Size, IndexData>::~prefix_queryable_index_store()
 {
 }
 
-template<typename IndexData>
-void prefix_queryable_index_store<IndexData>::create()
+template<std::size_t Size, typename IndexData>
+void prefix_queryable_index_store<Size, IndexData>::create()
 {
 }
 
-template<typename IndexData>
-void prefix_queryable_index_store<IndexData>::start()
+template<std::size_t Size, typename IndexData>
+void prefix_queryable_index_store<Size, IndexData>::start()
 {
 }
 
-template<typename IndexData>
-typename prefix_queryable_index_store<IndexData>::index_prefix_query_result_type
-    prefix_queryable_index_store<IndexData>::get_prefix(
+template<std::size_t Size, typename IndexData>
+typename prefix_queryable_index_store<Size, IndexData>::index_prefix_query_result_type
+    prefix_queryable_index_store<Size, IndexData>::get_prefix(
         const binary_type& prefix) const
 {
     auto result = trie_.find_prefixed(prefix);
     return index_prefix_query_result_type(result);
 }
 
-template<typename IndexData>
-bool prefix_queryable_index_store<IndexData>::remove_equal(
+template<std::size_t Size, typename IndexData>
+bool prefix_queryable_index_store<Size, IndexData>::remove_equal(
     const binary_type& primary, const secondary_key_type& secondary)
 {
     return trie_.remove_equal(primary, secondary);
 }
 
-template<typename IndexData>
-bool prefix_queryable_index_store<IndexData>::remove_equal(
+template<std::size_t Size, typename IndexData>
+bool prefix_queryable_index_store<Size, IndexData>::remove_equal(
     const secondary_key_type& secondary)
 {
     return trie_.remove_equal(secondary);
 }
 
-template<typename IndexData>
-typename prefix_queryable_index_store<IndexData>::index_data_result_type
-    prefix_queryable_index_store<IndexData>::remove_value(
+template<std::size_t Size, typename IndexData>
+typename prefix_queryable_index_store<Size, IndexData>::index_data_result_type
+    prefix_queryable_index_store<Size, IndexData>::remove_value(
         index_data_result_type& it)
 {
     auto next = trie_.remove_value(it.source_);
     return (index_data_result_type)(next);
 }
 
-template<typename IndexData>
-void prefix_queryable_index_store<IndexData>::sync()
+template<std::size_t Size, typename IndexData>
+void prefix_queryable_index_store<Size, IndexData>::sync()
 {
 }
 

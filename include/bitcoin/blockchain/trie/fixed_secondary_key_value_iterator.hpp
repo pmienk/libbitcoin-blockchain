@@ -40,7 +40,8 @@
 namespace libbitcoin {
 namespace blockchain {
 
-template<typename Key,
+template<std::size_t Size,
+    typename Key,
     typename Value,
     typename KeyComparer,
     typename ValueComparer,
@@ -55,8 +56,8 @@ template <typename Key,
     typename Comparer>
 class fixed_secondary_key_value_iterator
 {
-    template <typename K, typename V, typename KC, typename VC, typename SNA,
-        typename VNA>
+    template <std::size_t S, typename K, typename V, typename KC, typename VC,
+        typename SNA, typename VNA>
     friend class modified_patricia_trie;
 
 public:

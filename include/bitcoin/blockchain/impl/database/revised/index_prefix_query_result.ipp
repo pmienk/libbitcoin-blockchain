@@ -25,34 +25,34 @@ namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-template<typename IndexData>
-index_prefix_query_result<IndexData>::index_prefix_query_result(
+template<std::size_t Size, typename IndexData>
+index_prefix_query_result<Size, IndexData>::index_prefix_query_result(
     const pair_query_result_bool& result)
     : result_(result.first), is_valid_(result.second)
 {
 }
 
-template<typename IndexData>
-index_prefix_query_result<IndexData>::index_prefix_query_result(
+template<std::size_t Size, typename IndexData>
+index_prefix_query_result<Size, IndexData>::index_prefix_query_result(
     const query_result& result, bool is_valid)
     : result_(result), is_valid_(is_valid)
 {
 }
 
-template<typename IndexData>
-index_prefix_query_result<IndexData>::~index_prefix_query_result()
+template<std::size_t Size, typename IndexData>
+index_prefix_query_result<Size, IndexData>::~index_prefix_query_result()
 {
 }
 
-template<typename IndexData>
-index_prefix_query_result<IndexData>::operator bool() const
+template<std::size_t Size, typename IndexData>
+index_prefix_query_result<Size, IndexData>::operator bool() const
 {
     return is_valid_;
 }
 
-template<typename IndexData>
-typename index_prefix_query_result<IndexData>::data_range
-    index_prefix_query_result<IndexData>::get_exact(
+template<std::size_t Size, typename IndexData>
+typename index_prefix_query_result<Size, IndexData>::data_range
+    index_prefix_query_result<Size, IndexData>::get_exact(
         const secondary_key_type& key) const
 {
     auto bounds = result_.get_exact(key);
@@ -61,9 +61,9 @@ typename index_prefix_query_result<IndexData>::data_range
         (index_data_result_type)(bounds.second));
 }
 
-template<typename IndexData>
-typename index_prefix_query_result<IndexData>::data_range
-    index_prefix_query_result<IndexData>::get_exact_greater_equal(
+template<std::size_t Size, typename IndexData>
+typename index_prefix_query_result<Size, IndexData>::data_range
+    index_prefix_query_result<Size, IndexData>::get_exact_greater_equal(
         const secondary_key_type& key) const
 {
     auto bounds = result_.get_exact_greater_equal(key);
@@ -72,9 +72,9 @@ typename index_prefix_query_result<IndexData>::data_range
         (index_data_result_type)(bounds.second));
 }
 
-template<typename IndexData>
-typename index_prefix_query_result<IndexData>::data_range
-    index_prefix_query_result<IndexData>::get_prefixed(
+template<std::size_t Size, typename IndexData>
+typename index_prefix_query_result<Size, IndexData>::data_range
+    index_prefix_query_result<Size, IndexData>::get_prefixed(
         const secondary_key_type& key) const
 {
     auto bounds = result_.get_prefixed(key);
@@ -83,9 +83,9 @@ typename index_prefix_query_result<IndexData>::data_range
         (index_data_result_type)(bounds.second));
 }
 
-template<typename IndexData>
-typename index_prefix_query_result<IndexData>::data_range
-    index_prefix_query_result<IndexData>::get_prefixed_greater_equal(
+template<std::size_t Size, typename IndexData>
+typename index_prefix_query_result<Size, IndexData>::data_range
+    index_prefix_query_result<Size, IndexData>::get_prefixed_greater_equal(
         const secondary_key_type& key) const
 {
     auto bounds = result_.get_prefixed_greater_equal(key);

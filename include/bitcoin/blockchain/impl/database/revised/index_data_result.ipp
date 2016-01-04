@@ -25,27 +25,27 @@ namespace libbitcoin {
 namespace blockchain {
 namespace revised_database {
 
-template<typename IndexData>
-index_data_result<IndexData>::index_data_result(
+template<std::size_t Size, typename IndexData>
+index_data_result<Size, IndexData>::index_data_result(
     iterator_source& source)
     : source_(source)
 {
 }
 
-template<typename IndexData>
-index_data_result<IndexData>::~index_data_result()
+template<std::size_t Size, typename IndexData>
+index_data_result<Size, IndexData>::~index_data_result()
 {
 }
 
-template<typename IndexData>
-index_data_result<IndexData>::operator bool() const
+template<std::size_t Size, typename IndexData>
+index_data_result<Size, IndexData>::operator bool() const
 {
     return source_;
 }
 
-template<typename IndexData>
-typename index_data_result<IndexData>::iterator_source::reference
-    index_data_result<IndexData>::data() const
+template<std::size_t Size, typename IndexData>
+typename index_data_result<Size, IndexData>::iterator_source::reference
+    index_data_result<Size, IndexData>::data() const
 {
     return *source_;
 }
@@ -57,48 +57,48 @@ typename index_data_result<IndexData>::iterator_source::reference
 //    return source_;
 //}
 
-template<typename IndexData>
-bool index_data_result<IndexData>::operator==(
+template<std::size_t Size, typename IndexData>
+bool index_data_result<Size, IndexData>::operator==(
     const iter_type& other) const
 {
     return source_ == other.source_;
 }
 
-template<typename IndexData>
-bool index_data_result<IndexData>::operator!=(
+template<std::size_t Size, typename IndexData>
+bool index_data_result<Size, IndexData>::operator!=(
     const iter_type& other) const
 {
     return !(*this == other);
 }
 
-template<typename IndexData>
-typename index_data_result<IndexData>::iter_type&
-    index_data_result<IndexData>::operator++()
+template<std::size_t Size, typename IndexData>
+typename index_data_result<Size, IndexData>::iter_type&
+    index_data_result<Size, IndexData>::operator++()
 {
     source_++;
     return *this;
 }
 
-template<typename IndexData>
-typename index_data_result<IndexData>::iter_type
-    index_data_result<IndexData>::operator++(int)
+template<std::size_t Size, typename IndexData>
+typename index_data_result<Size, IndexData>::iter_type
+    index_data_result<Size, IndexData>::operator++(int)
 {
     auto it = *this;
     source_++;
     return it;
 }
 
-template<typename IndexData>
-typename index_data_result<IndexData>::iter_type&
-    index_data_result<IndexData>::operator--()
+template<std::size_t Size, typename IndexData>
+typename index_data_result<Size, IndexData>::iter_type&
+    index_data_result<Size, IndexData>::operator--()
 {
     source_--;
     return *this;
 }
 
-template<typename IndexData>
-typename index_data_result<IndexData>::iter_type
-    index_data_result<IndexData>::operator--(int)
+template<std::size_t Size, typename IndexData>
+typename index_data_result<Size, IndexData>::iter_type
+    index_data_result<Size, IndexData>::operator--(int)
 {
     auto it = *this;
     source_--;
