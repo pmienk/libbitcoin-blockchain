@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_nonzero_length_key_succeeds)
 
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    binary_type key(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
+    binary_type key(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD });
     int value = 17;
 
     auto insert_result = tree.insert_equal(key, 1, value);
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(insert_equal_multiple_same_key_succeeds)
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first,
         alloc_pair.second);
 
-    binary_type primary(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
+    binary_type primary(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD });
     uint32_t secondary = 1;
     std::vector<uint32_t> values = { 17, 112, 34, 56 };
 
@@ -367,91 +367,91 @@ BOOST_AUTO_TEST_CASE(insert_equal_multiple_same_key_succeeds)
     BOOST_REQUIRE(rit == find_result.second);
 }
 
-BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_leaf_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_leaf_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(17,  1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
+//}
 
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_intermediary_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(17,  1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
+//}
 
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
+//BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_match_existing_intermediary_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
+//        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(26,  1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
+//}
 
-    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
-}
+//BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_multiple_unique_keys)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
+//        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(26,  1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(34,  1,  binary_type(22, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(56,  1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(435, 1,  binary_type(15, bc::data_chunk { 0x0A, 0x5B, 0x00 })),
+//        std::make_tuple(234, 1,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
+//    };
+//
+//    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
+//}
 
-BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_add_intermediary_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
-}
-
-BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_match_existing_intermediary_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
-}
-
-BOOST_AUTO_TEST_CASE(insert_equal_fixed_secondary_key_multiple_unique_keys)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(34,  1,  binary_type(22, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(56,  1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(435, 1,  binary_type(15, bc::data_chunk { 0x0A, 0x5B, 0x00 })),
-        std::make_tuple(234, 1,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
-    };
-
-    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
-}
-
-BOOST_AUTO_TEST_CASE(insert_equal_multiple_unique_keys)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 2,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  2,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(34,  1,  binary_type(22, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(56,  2,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(435, 1,  binary_type(15, bc::data_chunk { 0x0A, 0x5B, 0x00 })),
-        std::make_tuple(234, 2,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
-    };
-
-    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
-}
+//BOOST_AUTO_TEST_CASE(insert_equal_multiple_unique_keys)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(97,  1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(112, 2,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
+//        std::make_tuple(17,  1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(26,  2,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(34,  1,  binary_type(22, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(56,  2,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(435, 1,  binary_type(15, bc::data_chunk { 0x0A, 0x5B, 0x00 })),
+//        std::make_tuple(234, 2,  binary_type(18, bc::data_chunk { 0x00, 0x02, 0x00 }))
+//    };
+//
+//    test_insert_equal_with_unique_keys_succeeds<32>(tree, value_key_tuples);
+//}
 
 //
 // insert_unique tests
@@ -483,11 +483,8 @@ BOOST_AUTO_TEST_CASE(insert_unique_key_length_exceeds_size_fails)
         alloc_pair.second);
 
     binary_type primary(40, bc::data_chunk {
-        0, 1, 0, 1, 0, 1, 0, 1,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        0, 1, 0, 1, 0, 1, 0, 1
+        0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+        0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1
     });
 
     uint32_t secondary = 2;
@@ -509,58 +506,58 @@ BOOST_AUTO_TEST_CASE(insert_unique_collision_returns_error)
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(false,  112,    1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+        std::make_tuple(true,   97,     1,  binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD })),
+        std::make_tuple(false,  112,    1,  binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD }))
     };
 
     test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
 }
 
-BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_leaf_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_leaf_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   17,     1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
+//}
 
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_intermediary_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   17,     1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
+//}
 
-    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   17,     1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
-}
-
-BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_add_intermediary_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   17,     1,  binary_type(25, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
-}
-
-BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_match_existing_intermediary_node)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(true,   17,     1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(true,   26,     1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
-}
+//BOOST_AUTO_TEST_CASE(insert_unique_fixed_secondary_key_match_existing_intermediary_node)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    std::vector<std::tuple<bool, uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(true,   97,     1,  binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   112,    1,  binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
+//        std::make_tuple(true,   17,     1,  binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(true,   26,     1,  binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    test_insert_unique_matches_expectation<32>(tree, value_key_tuples);
+//}
 
 //
 // find_prefix tests
@@ -572,10 +569,10 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_none)
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xEF })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDE }))
     };
 
     insert_equal<32>(tree, value_key_tuples);
@@ -595,15 +592,15 @@ BOOST_AUTO_TEST_CASE(find_prefixed_matches_all)
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xBB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0xBB })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xAA })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xCC })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD }))
     };
 
     binary_type query(8, bc::data_chunk { 0xAA });
 
-    std::vector<uint32_t> expected = { 97, 26, 112, 17 };
+    std::vector<uint32_t> expected = { 112, 97, 17, 26 };
 
     insert_equal<32>(tree, value_key_tuples);
 
@@ -621,15 +618,15 @@ BOOST_AUTO_TEST_CASE(find_prefix_matches_returns_subset)
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0xDD })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xEE })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0xDD }))
     };
 
     binary_type query(10, bc::data_chunk { 0xAA, 0xC0 });
 
-    std::vector<uint32_t> expected = { 26, 112 };
+    std::vector<uint32_t> expected = { 112, 26 };
 
     insert_equal<32>(tree, value_key_tuples);
 
@@ -649,7 +646,7 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_empty_tree)
 
     modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
 
-    binary_type primary(20, bc::data_chunk { 0xAA, 0xBB, 0xCC });
+    binary_type primary(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0xDD });
     uint32_t secondary = 1;
 
     bool success = tree.remove_equal(primary, secondary);
@@ -663,8 +660,8 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_zero_length_returns_false)
     uint32_t secondary = 1;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(26, 1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17, 1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(26, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -684,12 +681,12 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_zero_length_returns_false)
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_key_not_present_returns_false)
 {
-    binary_type primary(4, bc::data_chunk { 0xFF });
+    binary_type primary(32, bc::data_chunk { 0xFF, 0x00, 0x00, 0x00 });
     uint32_t secondary = 1;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(26, 1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17, 1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(26, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -707,38 +704,38 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_key_not_present_returns_false)
     verify_iterator_range<32, uint32_t, uint32_t>(value_key_tuples, range);
 }
 
-BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_of_root_with_single_value)
-{
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(26, 1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
-    };
-
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    auto insert_results = insert_equal<32>(tree, value_key_tuples);
-
-    bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
-        std::get<1>(value_key_tuples[0]));
-
-    BOOST_REQUIRE(success);
-
-    auto range = tree.find_secondary_key_bounds(std::get<1>(value_key_tuples[0]));
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
-        ++(value_key_tuples.begin()), value_key_tuples.end());
-
-    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
-}
+//BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_of_root_with_single_value)
+//{
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(17, 1, binary_type(4, bc::data_chunk { 0x50 })),
+//        std::make_tuple(26, 1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+//    };
+//
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
+//
+//    bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
+//        std::get<1>(value_key_tuples[0]));
+//
+//    BOOST_REQUIRE(success);
+//
+//    auto range = tree.find_secondary_key_bounds(std::get<1>(value_key_tuples[0]));
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected(
+//        ++(value_key_tuples.begin()), value_key_tuples.end());
+//
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
+//}
 
 BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_with_multiple_values)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17, 1, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(523, 1, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(26, 1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17, 1, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00 })),
+        std::make_tuple(523, 1, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00 })),
+        std::make_tuple(26, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -763,11 +760,11 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_leaf_with_multiple_values)
 BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(235, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xAA, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -784,10 +781,10 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
     auto range = tree.find_secondary_key_bounds(std::get<1>(value_key_tuples[0]));
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(235, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xAA, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
@@ -796,11 +793,11 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_unique_key)
 BOOST_AUTO_TEST_CASE(remove_equal_from_single_key_multiply_inserted)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -817,95 +814,95 @@ BOOST_AUTO_TEST_CASE(remove_equal_from_single_key_multiply_inserted)
     auto range = tree.find_secondary_key_bounds(std::get<1>(value_key_tuples[0]));
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
 }
 
-BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
-{
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
-    };
+//BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_is_not_removed)
+//{
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
+//        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB }))
+//    };
+//
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
+//
+//    bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
+//        std::get<1>(value_key_tuples[0]));
+//
+//    BOOST_REQUIRE(success);
+//
+//    auto range_1 = tree.find_secondary_key_bounds(1);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_1 = {
+//        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
+//        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
+//    };
+//
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
+//
+//    auto range_2 = tree.find_secondary_key_bounds(2);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_2 = {
+//        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
+//    };
+//
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
+//}
 
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    auto insert_results = insert_equal<32>(tree, value_key_tuples);
-
-    bool success = tree.remove_equal(std::get<2>(value_key_tuples[0]),
-        std::get<1>(value_key_tuples[0]));
-
-    BOOST_REQUIRE(success);
-
-    auto range_1 = tree.find_secondary_key_bounds(1);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_1 = {
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
-    };
-
-    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
-
-    auto range_2 = tree.find_secondary_key_bounds(2);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_2 = {
-        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC }))
-    };
-
-    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
-}
-
-BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
-{
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(59,  2, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
-    };
-
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    auto insert_results = insert_equal<32>(tree, value_key_tuples);
-
-    bool success = tree.remove_equal(std::get<2>(value_key_tuples[3]),
-        std::get<1>(value_key_tuples[3]));
-
-    BOOST_REQUIRE(success);
-
-    auto range_1 = tree.find_secondary_key_bounds(1);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_1 = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
-    };
-
-    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
-
-    auto range_2 = tree.find_secondary_key_bounds(2);
-
-    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_2 = {
-        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(59,  2, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
-    };
-
-    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
-}
+//BOOST_AUTO_TEST_CASE(remove_equal_multiple_secondary_keys_node_removed)
+//{
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
+//        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
+//        std::make_tuple(17,  2, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
+//        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
+//        std::make_tuple(59,  2, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
+//    };
+//
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    auto insert_results = insert_equal<32>(tree, value_key_tuples);
+//
+//    bool success = tree.remove_equal(std::get<2>(value_key_tuples[3]),
+//        std::get<1>(value_key_tuples[3]));
+//
+//    BOOST_REQUIRE(success);
+//
+//    auto range_1 = tree.find_secondary_key_bounds(1);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_1 = {
+//        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
+//        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
+//    };
+//
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected_1, range_1);
+//
+//    auto range_2 = tree.find_secondary_key_bounds(2);
+//
+//    std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected_2 = {
+//        std::make_tuple(97,  2, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
+//        std::make_tuple(59,  2, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+//    };
+//
+//    verify_iterator_range<32, uint32_t, uint32_t>(expected_2, range_2);
+//}
 
 //
 // remove_equal secondary key tests
@@ -926,12 +923,12 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_empty_secondary_key)
     uint32_t secondary = 2;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(59,  1, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(59,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -945,12 +942,12 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_empty_secondary_key)
     auto range = tree.find_secondary_key_bounds(1);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(59,  1, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(59,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, range);
@@ -961,12 +958,12 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_single_secondary_key_empti
     uint32_t secondary = 1;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB })),
-        std::make_tuple(59,  1, binary_type(24, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0x00, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(59,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -982,16 +979,16 @@ BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_single_secondary_key_empti
     BOOST_REQUIRE(range.first == range.second);
 }
 
-BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
-{
-    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
-
-    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
-
-    uint32_t secondary = 1;
-
-    BOOST_REQUIRE(!tree.remove_equal(secondary));
-}
+//BOOST_AUTO_TEST_CASE(remove_equal2_from_nonempty_tree_multiple_secondary_keys)
+//{
+//    auto alloc_pair = get_allocators<uint32_t, uint32_t>();
+//
+//    modified_patricia_trie<32, uint32_t, uint32_t> tree(alloc_pair.first, alloc_pair.second);
+//
+//    uint32_t secondary = 1;
+//
+//    BOOST_REQUIRE(!tree.remove_equal(secondary));
+//}
 
 //BOOST_AUTO_TEST_CASE(remove_prefix_from_key_zero_length_returns_false)
 //{
@@ -1316,8 +1313,8 @@ BOOST_AUTO_TEST_CASE(remove_value_from_empty_tree)
 BOOST_AUTO_TEST_CASE(remove_value_from_leaf_of_root_with_single_value)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17,  1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -1348,9 +1345,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_head)
     uint32_t secondary = 1;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17,  secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(523, secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(26,  secondary, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17,  secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 })),
+        std::make_tuple(523, secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 })),
+        std::make_tuple(26,  secondary, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -1366,8 +1363,8 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_head)
     auto bounds = tree.find_secondary_key_bounds(secondary);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(26,  secondary, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
-        std::make_tuple(523, secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 }))
+        std::make_tuple(26,  secondary, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 })),
+        std::make_tuple(523, secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
@@ -1378,9 +1375,9 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
     uint32_t secondary = 1;
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(17,  secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(523, secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 })),
-        std::make_tuple(26,  secondary, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(17,  secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 })),
+        std::make_tuple(523, secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 })),
+        std::make_tuple(26,  secondary, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -1396,8 +1393,8 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
     auto bounds = tree.find_secondary_key_bounds(secondary);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(26,  secondary, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
-        std::make_tuple(17,  secondary, binary_type(10, bc::data_chunk { 0xAB, 0xA0 }))
+        std::make_tuple(26,  secondary, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 })),
+        std::make_tuple(17,  secondary, binary_type(32, bc::data_chunk { 0xAB, 0xA0, 0x00, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);
@@ -1406,11 +1403,11 @@ BOOST_AUTO_TEST_CASE(remove_value_from_leaf_with_multiple_values_tail)
 BOOST_AUTO_TEST_CASE(remove_value_from_unique_key)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(4, bc::data_chunk { 0x50 })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0x50, 0x00, 0x00, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x01 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x01 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -1439,11 +1436,11 @@ BOOST_AUTO_TEST_CASE(remove_value_from_unique_key)
 BOOST_AUTO_TEST_CASE(remove_value_from_single_key_multiply_inserted)
 {
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> value_key_tuples = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(97,  1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC }))
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(97,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     auto alloc_pair = get_allocators<uint32_t, uint32_t>();
@@ -1461,10 +1458,10 @@ BOOST_AUTO_TEST_CASE(remove_value_from_single_key_multiply_inserted)
     auto bounds = tree.find_secondary_key_bounds(1);
 
     std::vector<std::tuple<uint32_t, uint32_t, binary_type>> expected = {
-        std::make_tuple(235, 1, binary_type(10, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(17,  1, binary_type(24, bc::data_chunk { 0xAA, 0xBB, 0xCC })),
-        std::make_tuple(26,  1, binary_type(16, bc::data_chunk { 0xAA, 0xCB, 0xCC })),
-        std::make_tuple(112, 1, binary_type(20, bc::data_chunk { 0xAA, 0xCB, 0x00 }))
+        std::make_tuple(17,  1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(235, 1, binary_type(32, bc::data_chunk { 0xAA, 0xBB, 0xCC, 0x00 })),
+        std::make_tuple(112, 1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0x00, 0x00 })),
+        std::make_tuple(26,  1, binary_type(32, bc::data_chunk { 0xAA, 0xCB, 0xCC, 0x00 }))
     };
 
     verify_iterator_range<32, uint32_t, uint32_t>(expected, bounds);

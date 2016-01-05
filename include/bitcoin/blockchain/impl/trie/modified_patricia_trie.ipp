@@ -261,8 +261,7 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
         bounds_query = node->store.add(key, { nullptr, nullptr, nullptr, nullptr }, true);
 
     value_node->anchor = node;
-    value_node->next = (*bounds_query.first).head;
-
+    auto* next = (*bounds_query.first).head;
     auto* previous = (*bounds_query.first).tail;
 
     while ((previous != nullptr) &&
@@ -271,13 +270,9 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
 
     if (previous != nullptr)
     {
-        auto* next = previous->next;
+        next = previous->next;
         previous->next = value_node;
         value_node->previous = previous;
-        value_node->next = next;
-
-        if (next != nullptr)
-            next->previous = value_node;
     }
 
     if (previous == (*bounds_query.first).tail)
@@ -289,9 +284,13 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
     if (previous == nullptr)
     {
         update = true;
-        value_node->next = (*bounds_query.first).head;
         (*bounds_query.first).head = value_node;
     }
+
+    value_node->next = next;
+
+    if (next != nullptr)
+        next->previous = value_node;
 
     // fixup left/right pointers
     if (update)
@@ -528,7 +527,7 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     auto current = root_;
 
     // prevent insertion with primary key longer than size template parameter
-    if (primary.size() > S)
+    if (primary.size() != S)
         return std::make_pair(iterator(secondary, current), false);
 
     auto result = insert(current, primary, secondary, value);
@@ -554,10 +553,14 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
     auto current = root_;
 
     // prevent insertion with primary key longer than size template parameter
-    if (primary.size() > S)
+    if (primary.size() != S)
         return std::make_pair(iterator(secondary, current), false);
 
     auto result = insert(current, primary, secondary, value);
+
+    // Note: Due to the introduction of the Size template parameter as a
+    // universal key length constraint, it becomes impossible to have such a
+    // matching intermediary node.
 
     // if we haven't created a node yet, but exhausted our key
     // we must have matched an existing node, if it has no value

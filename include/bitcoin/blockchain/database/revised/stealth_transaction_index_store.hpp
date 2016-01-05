@@ -34,7 +34,7 @@ namespace revised_database {
  * Used to resolve offsets from hashes.
  */
 class BCB_API stealth_transaction_index_store
-    : public prefix_queryable_index_store<hash_size * byte_bits, simple_transaction_index_data>
+    : public prefix_queryable_index_store<sizeof(uint32_t) * byte_bits, simple_transaction_index_data>
 {
 public:
     stealth_transaction_index_store();
