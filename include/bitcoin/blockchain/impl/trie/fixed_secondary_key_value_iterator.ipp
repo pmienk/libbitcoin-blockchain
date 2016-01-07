@@ -52,7 +52,11 @@ fixed_secondary_key_value_iterator<K, V, P, R, C>::fixed_secondary_key_value_ite
     auto query = (*iterator_)->store.retrieve(key);
 
     if (query.second)
-        value_node_ = (*query.first).head;
+    {
+        if (((*query.first).head_leftmost != nullptr) &&
+            ((*query.first).head_leftmost->anchor == iterator_.trie_node_))
+            value_node_ = (*query.first).head_leftmost;
+    }
 }
 
 template <typename K, typename V, typename P, typename R, typename C>
@@ -63,7 +67,11 @@ fixed_secondary_key_value_iterator<K, V, P, R, C>::fixed_secondary_key_value_ite
     auto query = (*iterator_)->store.retrieve(key);
 
     if (query.second)
-        value_node_ = (*query.first).head;
+    {
+        if (((*query.first).head_leftmost != nullptr) &&
+            ((*query.first).head_leftmost->anchor == iterator_.trie_node_))
+            value_node_ = (*query.first).head_leftmost;
+    }
 }
 
 template <typename K, typename V, typename P, typename R, typename C>
@@ -162,7 +170,11 @@ void fixed_secondary_key_value_iterator<K, V, P, R, C>::increment()
         auto query = (*iterator_)->store.retrieve(get_secondary_key());
 
         if (query.second)
-            value_node_ = (*query.first).head;
+        {
+            if (((*query.first).head_leftmost != nullptr) &&
+                ((*query.first).head_leftmost->anchor == iterator_.trie_node_))
+                    value_node_ = (*query.first).head_leftmost;
+        }
     }
 }
 
@@ -178,7 +190,11 @@ void fixed_secondary_key_value_iterator<K, V, P, R, C>::decrement()
         auto query = (*iterator_)->store.retrieve(get_secondary_key());
 
         if (query.second)
-            value_node_ = (*query.first).tail;
+        {
+            if (((*query.first).head_leftmost != nullptr) &&
+                ((*query.first).head_leftmost->anchor == iterator_.trie_node_))
+                    value_node_ = (*query.first).tail_rightmost;
+        }
     }
 }
 
@@ -195,7 +211,7 @@ bool fixed_secondary_key_value_iterator<K, V, P, R, C>::first_value_with_primary
     auto query = (*iterator_)->store.retrieve(get_secondary_key());
 
     if (query.second)
-        result = ((*query.first).head == value_node_);
+        result = ((*query.first).head_leftmost == value_node_);
 
     return result;
 }
@@ -207,7 +223,7 @@ bool fixed_secondary_key_value_iterator<K, V, P, R, C>::last_value_with_primary_
     auto query = (*iterator_)->store.retrieve(get_secondary_key());
 
     if (query.second)
-        result = ((*query.first).tail == value_node_);
+        result = ((*query.first).tail_rightmost == value_node_);
 
     return result;
 }

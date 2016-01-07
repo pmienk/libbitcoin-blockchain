@@ -196,7 +196,7 @@ typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::node_ptr
     auto query_result = origin->store.retrieve(key);
 
     if (query_result.second)
-        result = (*query_result.first).leftmost->anchor;
+        result = (*query_result.first).head_leftmost->anchor;
 
     return result;
 }
@@ -210,7 +210,7 @@ typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::node_ptr
     auto query_result = origin->store.retrieve(key);
 
     if (query_result.second)
-        result = (*query_result.first).rightmost->anchor;
+        result = (*query_result.first).tail_rightmost->anchor;
 
     return result;
 }
@@ -232,7 +232,7 @@ typename fixed_secondary_key_structure_iterator<Key, Value, Pointer>::node_ptr
         // a value is reached
         auto child = next->get_first_child(key);
         auto query_result = child->store.retrieve(key);
-        next = (*query_result.first).leftmost->anchor;
+        next = (*query_result.first).head_leftmost->anchor;
     }
     else
     {

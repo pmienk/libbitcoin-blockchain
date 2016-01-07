@@ -48,12 +48,22 @@ template<std::size_t Size,
     typename ValueNodeAllocator>
 class modified_patricia_trie;
 
+template<typename Key,
+    typename Value,
+    typename Pointer,
+    typename Reference,
+    typename Comparer>
+class fixed_secondary_key_value_iterator;
+
 template <typename Key, typename Value, typename Pointer>
 class fixed_secondary_key_structure_iterator
 {
     template <std::size_t S, typename K, typename V, typename KC, typename VC,
         typename SNA, typename VNA>
     friend class modified_patricia_trie;
+
+    template <typename K, typename V, typename P, typename R, typename C>
+    friend class fixed_secondary_key_value_iterator;
 
 public:
 

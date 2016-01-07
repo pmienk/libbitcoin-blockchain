@@ -137,7 +137,16 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
     {
         for (auto it = node->store.begin(); it != node->store.end(); ++it)
         {
-            auto value = (*it).head;
+            bool immutable = false;
+            auto value = (*it).head_leftmost;
+
+            // Restrict to removing only anchored values, rely on the fact
+            // that there cannot be a mix of anchored and unanchored values.
+            if ((value != nullptr) && (value->anchor != node))
+            {
+                immutable = true;
+                value = nullptr;
+            }
 
             while (value != nullptr)
             {
@@ -146,36 +155,97 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
                 value = next;
             }
 
-            (*it).head = nullptr;
-            (*it).tail = nullptr;
+            if (!immutable)
+            {
+                (*it).head_leftmost = nullptr;
+                (*it).tail_rightmost = nullptr;
+            }
         }
     }
 }
 
 template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
-    structure_node_type* node, const secondary_key_type& key)
+typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
+    modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::disconnect_values(
+        structure_node_type* node, const secondary_key_type& key)
 {
+    value_node_type* head = nullptr;
+
     if (node != nullptr)
     {
         auto bounds = node->store.retrieve(key);
 
         if (bounds.second)
         {
-            auto value = (*bounds.first).head;
+            bool immutable = false;
+            auto value = (*bounds.first).head_leftmost;
 
-            while (value != nullptr)
+            // Restrict to removing only anchored values, rely on the fact
+            // that there cannot be a mix of anchored and unanchored values.
+            if ((value != nullptr) && (value->anchor != node))
             {
-                auto next = value->next;
-                destroy_value_node(value);
-                value = next;
+                immutable = true;
+                value = nullptr;
             }
 
-            (*bounds.first).head = nullptr;
-            (*bounds.first).tail = nullptr;
+            head = value;
+
+            if (!immutable)
+            {
+                (*bounds.first).head_leftmost = nullptr;
+                (*bounds.first).tail_rightmost = nullptr;
+            }
+        }
+    }
+
+    return head;
+}
+
+template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_disconnected_list(value_node_type* head)
+{
+    if (head != nullptr)
+    {
+        auto value = head;
+
+        while (value != nullptr)
+        {
+            auto next = value->next;
+            destroy_value_node(value);
+            value = next;
         }
     }
 }
+
+//template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
+//void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
+//    structure_node_type* node, const secondary_key_type& key)
+//{
+//    if (node != nullptr)
+//    {
+//        auto bounds = node->store.retrieve(key);
+//
+//        if (bounds.second)
+//        {
+//            auto value = (*bounds.first).head_leftmost;
+//
+//            // Restrict to removing only anchored values, rely on the fact
+//            // that there cannot be a mix of anchored and unanchored values.
+//            if ((value != nullptr) && (value->anchor != node))
+//                value = nullptr;
+//
+//            while (value != nullptr)
+//            {
+//                auto next = value->next;
+//                destroy_value_node(value);
+//                value = next;
+//            }
+//
+//            (*bounds.first).head_leftmost = nullptr;
+//            (*bounds.first).tail_rightmost = nullptr;
+//        }
+//    }
+//}
 
 template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
@@ -258,11 +328,11 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
     auto bounds_query = node->store.retrieve(key);
 
     if (!bounds_query.second)
-        bounds_query = node->store.add(key, { nullptr, nullptr, nullptr, nullptr }, true);
+        bounds_query = node->store.add(key, { nullptr, nullptr }, true);
 
     value_node->anchor = node;
-    auto* next = (*bounds_query.first).head;
-    auto* previous = (*bounds_query.first).tail;
+    auto* next = (*bounds_query.first).head_leftmost;
+    auto* previous = (*bounds_query.first).tail_rightmost;
 
     while ((previous != nullptr) &&
         !value_comparer_(value_node->value, previous->value))
@@ -275,16 +345,16 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::value_node_type*
         value_node->previous = previous;
     }
 
-    if (previous == (*bounds_query.first).tail)
+    if (previous == (*bounds_query.first).tail_rightmost)
     {
         update = true;
-        (*bounds_query.first).tail = value_node;
+        (*bounds_query.first).tail_rightmost = value_node;
     }
 
     if (previous == nullptr)
     {
         update = true;
-        (*bounds_query.first).head = value_node;
+        (*bounds_query.first).head_leftmost = value_node;
     }
 
     value_node->next = next;
@@ -331,10 +401,12 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::update_left_and_right(
 
         if (result.second)
         {
-            (*result.first).leftmost = (*result.first).head;
-            (*result.first).rightmost = (*result.first).tail;
+//            (*result.first).leftmost = (*result.first).head;
+//            (*result.first).rightmost = (*result.first).tail;
 
-            if ((*result.first).leftmost == nullptr)
+            // Assumes reachable values anchored to other nodes are not deallocated.
+            if (((*result.first).head_leftmost == nullptr) ||
+                ((*result.first).head_leftmost->anchor != node))
                 node->store.remove(key);
         }
     }
@@ -346,19 +418,13 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::update_left_and_right(
             key_bounds = node->store.add(key,
                 typename structure_node_type::value_boundaries());
 
-        if (key_bounds.second)
-        {
-            if ((*key_bounds.first).head != nullptr)
-                (*key_bounds.first).leftmost = (*key_bounds.first).head;
-            else
-            {
-                auto first_child_bounds = node->get_first_child(key)->store.retrieve(key);
-                (*key_bounds.first).leftmost = (*first_child_bounds.first).leftmost;
-            }
+        // Note: assumes no catestrophic failure in node->store.add as no check
+        // to key_bounds.second is performed or exception thrown.
+        auto first_child_bounds = node->get_first_child(key)->store.retrieve(key);
+        (*key_bounds.first).head_leftmost = (*first_child_bounds.first).head_leftmost;
 
-            auto last_child_bounds = node->get_last_child(key)->store.retrieve(key);
-            (*key_bounds.first).rightmost = (*last_child_bounds.first).rightmost;
-        }
+        auto last_child_bounds = node->get_last_child(key)->store.retrieve(key);
+        (*key_bounds.first).tail_rightmost = (*last_child_bounds.first).tail_rightmost;
     }
 }
 
@@ -441,7 +507,7 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
             auto value_bounds = node->store.retrieve(secondary);
 
             return std::make_pair(
-                iterator(secondary, (*(value_bounds.first)).head),
+                iterator(secondary, (*(value_bounds.first)).head_leftmost),
                 true);
         }
 
@@ -500,6 +566,9 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
             }
             else
             {
+                // Note: Due to the introduction of universal Size restrictions
+                // on primary keys, this code should be unreachable.
+
                 // otherwise intermediary label must be key, so add value to
                 // the intermediary which was uniquely added and link_node
                 auto* inserted = append_value(intermediary, secondary, value);
@@ -682,8 +751,9 @@ bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::remove_equal(
     if (!nonremovable)
     {
         auto node = find_pair.first;
-        erase_values(node, secondary);
+        auto disconnected = disconnect_values(node, secondary);
         compress_branch(node, secondary);
+        erase_disconnected_list(disconnected);
     }
 
     return !nonremovable;
@@ -703,8 +773,9 @@ bool modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::remove_equal(
     {
         auto node = begin.trie_node_;
         ++begin;
-        erase_values(node, secondary);
+        auto disconnected = disconnect_values(node, secondary);
         compress_branch(node, secondary);
+        erase_disconnected_list(disconnected);
         removed = true;
     }
 
@@ -726,13 +797,14 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator
     auto struct_iter = it.get_structure_iterator();
     ++struct_iter;
 
-    if ((*anchor_key_bounds.first).head == (*anchor_key_bounds.first).tail)
+    if ((*anchor_key_bounds.first).head_leftmost == (*anchor_key_bounds.first).tail_rightmost)
     {
         auto next = struct_iter.trie_node_;
 
         // otherwise, remove all values and attempt to remove the node
-        erase_values(anchor, secondary_key);
+        auto disconnected = disconnect_values(anchor, secondary_key);
         compress_branch(anchor, secondary_key);
+        erase_disconnected_list(disconnected);
 
         return (iterator)(next);
     }
@@ -751,15 +823,15 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::iterator
     value_node->next = nullptr;
     value_node->previous = nullptr;
 
-    if ((*anchor_key_bounds.first).head == value_node)
+    if ((*anchor_key_bounds.first).head_leftmost == value_node)
     {
-        (*anchor_key_bounds.first).head = next;
+        (*anchor_key_bounds.first).head_leftmost = next;
         update = true;
     }
 
-    if ((*anchor_key_bounds.first).tail == value_node)
+    if ((*anchor_key_bounds.first).tail_rightmost == value_node)
     {
-        (*anchor_key_bounds.first).tail = previous;
+        (*anchor_key_bounds.first).tail_rightmost = previous;
         update = true;
     }
 

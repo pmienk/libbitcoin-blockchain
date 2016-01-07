@@ -58,10 +58,8 @@ public:
 
     struct value_boundaries
     {
-        value_node_type* leftmost;
-        value_node_type* rightmost;
-        value_node_type* head;
-        value_node_type* tail;
+        value_node_type* head_leftmost;
+        value_node_type* tail_rightmost;
     };
 
     typedef std::allocator<red_black_node<key_type, value_boundaries>> red_black_allocator_type;

@@ -63,10 +63,18 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
     if (!result.second)
         return std::make_pair(terminal_, terminal_);
 
-    auto begin = iterator(key, (*result.first).head);
-    auto end = iterator(key, (*result.first).tail);
+    auto head = (*result.first).head_leftmost;
+    auto tail = (*result.first).tail_rightmost;
 
-    if ((*result.first).tail != nullptr)
+    if ((head != nullptr) && (head->anchor != node_))
+    {
+        head = nullptr;
+        tail = nullptr;
+    }
+
+    auto begin = iterator(key, head);
+    auto end = iterator(key, tail);
+    if (tail != nullptr)
         ++end;
 
     return std::make_pair(begin, end);
@@ -85,10 +93,18 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
     if (!result.second)
         return std::make_pair(terminal_, terminal_);
 
-    auto begin = iterator(key, (*result.first).head);
-    auto end = iterator(key, (*result.first).tail);
+    auto head = (*result.first).head_leftmost;
+    auto tail = (*result.first).tail_rightmost;
 
-    if ((*result.first).tail != nullptr)
+    if ((head != nullptr) && (head->anchor != node_))
+    {
+        head = nullptr;
+        tail = nullptr;
+    }
+
+    auto begin = iterator(key, head);
+    auto end = iterator(key, tail);
+    if (tail != nullptr)
         ++end;
 
     return std::make_pair(begin, end);
@@ -107,10 +123,10 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
     if (!result.second)
         return std::make_pair(terminal_, terminal_);
 
-    auto begin = iterator(key, (*result.first).leftmost);
-    auto end = iterator(key, (*result.first).rightmost);
+    auto begin = iterator(key, (*result.first).head_leftmost);
+    auto end = iterator(key, (*result.first).tail_rightmost);
 
-    if ((*result.first).rightmost != nullptr)
+    if ((*result.first).tail_rightmost != nullptr)
         ++end;
 
     return std::make_pair(begin, end);
@@ -129,10 +145,10 @@ typename prefix_query_result<Key, Value, Comparer>::iterator_range
     if (!result.second)
         return std::make_pair(terminal_, terminal_);
 
-    auto begin = iterator(key, (*result.first).leftmost);
-    auto end = iterator(key, (*result.first).rightmost);
+    auto begin = iterator(key, (*result.first).head_leftmost);
+    auto end = iterator(key, (*result.first).tail_rightmost);
 
-    if ((*result.first).rightmost != nullptr)
+    if ((*result.first).tail_rightmost != nullptr)
         ++end;
 
     return std::make_pair(begin, end);

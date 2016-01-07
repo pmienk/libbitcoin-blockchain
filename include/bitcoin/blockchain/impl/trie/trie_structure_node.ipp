@@ -80,7 +80,8 @@ bool trie_structure_node<Key, Node, Comparer>::has_value() const
     bool result = false;
 
     for (auto it = store.begin(); !result && (it != store.end()); ++it)
-        result = ((*it).head != nullptr);
+        result = (((*it).head_leftmost != nullptr) &&
+            ((*it).head_leftmost->anchor == this));
 
     return result;
 }
@@ -92,7 +93,8 @@ bool trie_structure_node<Key, Node, Comparer>::has_value(const key_type& key) co
     auto store_result = store.retrieve(key);
 
     if (store_result.second)
-        result = ((*store_result.first).head != nullptr);
+        result = ((*store_result.first).head_leftmost != nullptr) &&
+            ((*store_result.first).head_leftmost->anchor == this);
 
     return result;
 }

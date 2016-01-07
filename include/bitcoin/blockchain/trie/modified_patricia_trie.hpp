@@ -161,7 +161,10 @@ protected:
     // cleanup/teardown
     void erase_values(structure_node_type* node);
 
-    void erase_values(structure_node_type* node, const secondary_key_type& key);
+    value_node_type* disconnect_values(structure_node_type* node,
+        const secondary_key_type& key);
+
+    void erase_disconnected_list(value_node_type* head);
 
     structure_node_type* compress_branch(structure_node_type* node,
         const secondary_key_type& key);
