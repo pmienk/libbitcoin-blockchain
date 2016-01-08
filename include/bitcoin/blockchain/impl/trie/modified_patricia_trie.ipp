@@ -217,36 +217,6 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_disconnected_list(
     }
 }
 
-//template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
-//void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::erase_values(
-//    structure_node_type* node, const secondary_key_type& key)
-//{
-//    if (node != nullptr)
-//    {
-//        auto bounds = node->store.retrieve(key);
-//
-//        if (bounds.second)
-//        {
-//            auto value = (*bounds.first).head_leftmost;
-//
-//            // Restrict to removing only anchored values, rely on the fact
-//            // that there cannot be a mix of anchored and unanchored values.
-//            if ((value != nullptr) && (value->anchor != node))
-//                value = nullptr;
-//
-//            while (value != nullptr)
-//            {
-//                auto next = value->next;
-//                destroy_value_node(value);
-//                value = next;
-//            }
-//
-//            (*bounds.first).head_leftmost = nullptr;
-//            (*bounds.first).tail_rightmost = nullptr;
-//        }
-//    }
-//}
-
 template <std::size_t S, typename K, typename V, typename KC, typename VC, typename SNA, typename VNA>
 typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::structure_node_type*
     modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::compress_branch(
@@ -401,8 +371,8 @@ void modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::update_left_and_right(
 
         if (result.second)
         {
-//            (*result.first).leftmost = (*result.first).head;
-//            (*result.first).rightmost = (*result.first).tail;
+            // (*result.first).leftmost = (*result.first).head;
+            // (*result.first).rightmost = (*result.first).tail;
 
             // Assumes reachable values anchored to other nodes are not deallocated.
             if (((*result.first).head_leftmost == nullptr) ||
@@ -515,15 +485,19 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
         // second character as first character was redundantly encoded
         // and checked during child choice for the loop's examination
         bool matches_label = true;
-        bool initial_match_label_exceeds_key = false;
+        // bool initial_match_label_exceeds_key = false;
         binary_type::size_type label_offset = 1;
 
         for (; (label_offset < initial_match->label.size()); ++label_offset)
         {
             if ((key_offset + label_offset) >= primary.size())
             {
-                initial_match_label_exceeds_key = true;
-                break;
+                // Note: impossible due to universal primary key size imposed
+                // by wrapping function
+                throw std::runtime_error("Unexpected key size encountered within trie.");
+
+                // initial_match_label_exceeds_key = true;
+                // break;
             }
 
             if (initial_match->label[label_offset] !=
@@ -534,8 +508,8 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
             }
         }
 
-        if (!matches_label || initial_match_label_exceeds_key
-            || (label_offset != initial_match->label.size()))
+        if (!matches_label || /*initial_match_label_exceeds_key ||*/
+            (label_offset != initial_match->label.size()))
         {
             // if there is a disagreement, introduce intermediary node
             // and insert the new branch
@@ -568,12 +542,13 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
             {
                 // Note: Due to the introduction of universal Size restrictions
                 // on primary keys, this code should be unreachable.
+                throw std::runtime_error("Unexpected key size causes insertion of intermediary value.");
 
                 // otherwise intermediary label must be key, so add value to
                 // the intermediary which was uniquely added and link_node
-                auto* inserted = append_value(intermediary, secondary, value);
-                current = intermediary;
-                return std::make_pair(iterator(secondary, inserted), true);
+                // auto* inserted = append_value(intermediary, secondary, value);
+                // current = intermediary;
+                // return std::make_pair(iterator(secondary, inserted), true);
             }
         }
         else
@@ -627,17 +602,18 @@ typename modified_patricia_trie<S, K, V, KC, VC, SNA, VNA>::pair_iterator_bool
 
     auto result = insert(current, primary, secondary, value);
 
-    // Note: Due to the introduction of the Size template parameter as a
-    // universal key length constraint, it becomes impossible to have such a
-    // matching intermediary node.
-
     // if we haven't created a node yet, but exhausted our key
     // we must have matched an existing node, if it has no value
     // we can introduce one here
     if (!result.second && !current->has_value(secondary) && (current != root_))
     {
-        auto inserted = append_value(current, secondary, value);
-        return std::make_pair(iterator(secondary, inserted), true);
+        // Note: Due to the introduction of the Size template parameter as a
+        // universal key length constraint, it becomes impossible to have such a
+        // matching intermediary node.
+        throw std::runtime_error("Unexpected intermediary node useable for value insertion.");
+
+        // auto inserted = append_value(current, secondary, value);
+        // return std::make_pair(iterator(secondary, inserted), true);
     }
 
     return result;
