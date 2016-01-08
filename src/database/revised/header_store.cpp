@@ -58,6 +58,7 @@ simple_allocator::position_type header_store::store(
     ostream_writer writer(sink);
     writer.write_byte(0x00);
     header.to_data(writer, false);
+    return offset;
 }
 
 void header_store::sync()

@@ -58,9 +58,20 @@ public:
 
     struct by_chain_height {};
 
+    struct hash_digest_hash
+    {
+        std::size_t operator()(const hash_digest& key)const
+        {
+            //return boost::hash<uint32_t>()(key.k1) + boost::hash<uint32_t>()(key.k2);
+            hash_number temp;
+            temp.set_hash(key);
+            return temp.compact();
+        }
+    };
+
     typedef boost::multi_index_container<entry, boost::multi_index::indexed_by<
         boost::multi_index::hashed_unique<boost::multi_index::tag<by_hash>,
-            boost::multi_index::member<entry, hash_digest, &entry::hash>>,
+            boost::multi_index::member<entry, hash_digest, &entry::hash>, hash_digest_hash>,
         boost::multi_index::hashed_non_unique<
             boost::multi_index::tag<by_chain_height>,
             boost::multi_index::composite_key<entry,

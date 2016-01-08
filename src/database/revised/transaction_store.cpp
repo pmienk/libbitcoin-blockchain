@@ -64,6 +64,7 @@ simple_allocator::position_type transaction_store::store(
     writer.write_byte(0x00);
     writer.write_4_bytes_little_endian(transaction_size);
     transaction.to_data(writer);
+    return offset;
 }
 
 void transaction_store::sync()

@@ -64,6 +64,8 @@ simple_allocator::position_type merkle_tree_store::store(
 
     for (auto& hash : transaction_hashes)
         writer.write_hash(hash);
+
+    return offset;
 }
 
 void merkle_tree_store::sync()
