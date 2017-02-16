@@ -37,7 +37,7 @@ using namespace std::placeholders;
 
 #define NAME "transaction_organizer"
 
-// TODO: create priority pool at blockchain level and use in both organizers. 
+// TODO: create priority pool at blockchain level and use in both organizers.
 transaction_organizer::transaction_organizer(prioritized_mutex& mutex,
     dispatcher& dispatch, threadpool& thread_pool, fast_chain& chain,
     const settings& settings)
