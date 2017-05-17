@@ -72,7 +72,15 @@ transaction_entry::list transaction_pool::get_template() const
 void transaction_pool::add_unconfirmed_transactions(
     const transaction_const_ptr_list& unconfirmed_txs)
 {
+//    tranasaction_entry::ptr max_introduced(null_hash);
     auto max_introduced = pool_.left.end();
+
+    // order the transactions to be added preferring parents before children
+
+    // for each entry to be added, check whether an entry already exists
+    // if the entry exists
+        // if an anchor, add parent anchors, for each ancestor, recalculate priority
+    // if the entry is new, add it
 
     for (const auto& tx : unconfirmed_txs)
     {

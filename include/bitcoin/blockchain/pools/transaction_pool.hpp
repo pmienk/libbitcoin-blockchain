@@ -65,7 +65,7 @@ private:
             boost::hash<boost::bimaps::tags::support::value_type_of<
                 transaction_entry::ptr>::type>,
             transaction_entry::ptr_equal>,
-        boost::bimaps::multiset_of<priority>> prioritized_transactions;
+        boost::bimaps::multiset_of<priority, std::greater<priority>>> prioritized_transactions;
 
     priority calculate_priority(transaction_entry::ptr tx);
 

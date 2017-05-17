@@ -60,8 +60,8 @@ public:
     bool bip113;
 
     // Mining/Template inputs
-//    bc::config::script coinbase_input;
-//    bc::config::script coinbase_output;
+    bc::config::script coinbase_input;
+    bc::config::script coinbase_output;
     size_t block_sigop_limit;
     size_t block_bytes_limit;
 };
