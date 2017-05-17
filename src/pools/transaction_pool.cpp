@@ -19,6 +19,7 @@
 #include <bitcoin/blockchain/pools/transaction_pool.hpp>
 
 #include <cstddef>
+#include <deque>
 #include <memory>
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/settings.hpp>
@@ -31,6 +32,8 @@ namespace blockchain {
 // even if the original becomes spent in the same block, because the BIP30
 // exmaple implementation simply tests all txs in a new block against
 // transactions in previous blocks.
+
+transaction_pool::priority anchor_priority = 0.0;
 
 transaction_pool::transaction_pool(const settings& settings)
   ////: reject_conflicts_(settings.reject_conflicts),
@@ -52,6 +55,543 @@ void transaction_pool::fetch_mempool(size_t maximum,
 {
     const auto empty = std::make_shared<message::inventory>();
     handler(error::success, empty);
+}
+
+transaction_entry::list transaction_pool::get_mempool() const
+{
+    transaction_entry::list result;
+    return result;
+}
+
+transaction_entry::list transaction_pool::get_template() const
+{
+    transaction_entry::list result;
+    return result;
+}
+
+void transaction_pool::add_unconfirmed_transactions(
+    const transaction_const_ptr_list& unconfirmed_txs)
+{
+    auto max_introduced = pool_.left.end();
+
+    for (const auto& tx : unconfirmed_txs)
+    {
+        auto unconfirmed_entry = std::make_shared<transaction_entry>(tx);
+        uint32_t i = 0;
+
+        // Add/retrieve anchors for each transaction
+        for (const auto& input : tx->inputs())
+        {
+            auto lookup_entry = std::make_shared<transaction_entry>(
+                    input.previous_output().hash());
+
+            const auto it = pool_.left.find(lookup_entry);
+
+            auto input_entry = (it != pool_.left.end()) ?
+                it->first : lookup_entry;
+
+            if (input_entry == lookup_entry)
+                pool_.insert({ input_entry, anchor_priority });
+
+            unconfirmed_entry->add_child(i, input_entry);
+            i++;
+        }
+
+        // Add unconfirmed transaction
+        priority unconfirmed_priority = calculate_priority(unconfirmed_entry);
+
+        pool_.insert({ unconfirmed_entry, unconfirmed_priority });
+
+        // track encountered maximum priority
+        if (unconfirmed_priority > max_introduced->second)
+            max_introduced = pool_.left.find(unconfirmed_entry);
+    }
+
+    // Using remembered highest priority inserted new transaction,
+    // invalidate cached solution below priority and recompute.
+    if (unconfirmed_txs.size() > 0)
+    {
+        auto projected = pool_.project_right(max_introduced);
+        update_template(projected);
+    }
+}
+
+void transaction_pool::remove_transactions(transaction_const_ptr_list& txs)
+{
+    // generate map of initial txs
+    std::map<hash_digest, bool> removal_bounds;
+    for (auto& tx : txs)
+        removal_bounds.insert({ tx->hash(), true });
+
+    // compute coverage of inputs being spent
+    std::map<hash_digest, std::map<uint32_t, bool>> input_indicies;
+    for (auto& tx : txs)
+    {
+        for (auto& input : tx->inputs())
+        {
+            auto it = input_indicies.find(input.previous_output().hash());
+            if (it == input_indicies.end())
+                input_indicies.insert({ input.previous_output().hash(),
+                    { { input.previous_output().index(), true } } });
+            else
+            {
+                if (it->second.find(input.previous_output().index()) == it->second.end())
+                    it->second.insert({ input.previous_output().index(), true });
+            }
+        }
+    }
+
+    std::deque<transaction_entry::ptr> conditional_removal;
+    std::deque<transaction_entry::ptr> unconditional_removal;
+
+    // walk input transactions,
+    for (auto& input_it : input_indicies)
+    {
+        if (removal_bounds.find(input_it.first) != removal_bounds.end())
+            continue;
+
+        auto key = std::make_shared<transaction_entry>(input_it.first);
+        auto member = pool_.left.find(key);
+        if (member == pool_.left.end())
+            continue;
+
+        auto children = member->first->children().left;
+        auto remove = (children.size() == input_it.second.size());
+
+        for (auto index_it : input_it.second)
+        {
+            auto index_child = children.find(index_it.first);
+            remove &= (index_child != children.end());
+            if (index_child != children.end())
+            {
+                if (removal_bounds.find(index_child->second->hash()) != removal_bounds.end())
+                    conditional_removal.push_back(index_child->second);
+                else
+                    unconditional_removal.push_back(index_child->second);
+            }
+        }
+
+        // remove the anchor as all elements depending upon it will
+        // either themselves become anchors or will be removed
+        if (remove)
+        {
+            // NOTE: assert is inappropriate, but used to document assumption
+            BITCOIN_ASSERT(member->first->parents().size() == 0);
+            member->first->remove_children();
+            pool_.left.erase(member);
+        }
+    }
+
+    priority max_from_conflicts = remove_spend_conflicts(
+        unconditional_removal);
+
+    priority max_from_demotion = demote(conditional_removal, removal_bounds);
+
+    priority max_removed = (max_from_conflicts > max_from_demotion) ?
+        max_from_conflicts : max_from_demotion;
+
+    // Using remembered highest priority inserted new transaction,
+    // invalidate cached solution below priority and recompute.
+    if (txs.size() > 0)
+    {
+        auto inflection = find_inflection(pool_, max_removed);
+        update_template(inflection);
+    }
+}
+
+transaction_pool::priority transaction_pool::remove_spend_conflicts(
+    std::deque<transaction_entry::ptr>& queue)
+{
+    priority max_removed = 0.0;
+    std::map<hash_digest, bool> pending_removal;
+
+    // for each entry,
+    while (!queue.empty())
+    {
+        auto element = queue.back();
+        queue.pop_back();
+
+        // skip repeated elements
+        if (pending_removal.find(element->hash()) == pending_removal.end())
+            continue;
+
+        auto& children = element->children().left;
+        std::list<uint32_t> indicies;
+
+        // add children to list
+        for (auto entry = children.begin(); entry != children.end(); ++entry)
+            queue.push_back(entry->second);
+
+        element->remove_children();
+
+        auto& parents = element->parents();
+
+        // sever parent connections, enqueue child-less anchor parents
+        for (auto& entry : parents)
+        {
+            entry->remove_child(element);
+            if (entry->is_anchor() && entry->children().size() == 0)
+                queue.push_back(entry);
+        }
+
+        // remove entry from pool and template
+        auto pool_member = pool_.left.find(element);
+        if (pool_member != pool_.left.end())
+            pool_.left.erase(pool_member);
+
+        auto template_member = template_.left.find(element);
+        if (template_member != template_.left.end())
+        {
+            if (max_removed < template_member->second)
+                max_removed = template_member->second;
+
+            template_bytes_ -= template_member->first->size();
+            template_sigops_ -= template_member->first->sigops();
+            template_.erase(prioritized_transactions::value_type(
+                template_member->first, template_member->second));
+        }
+
+        // indicate completion with element
+        pending_removal.insert({ element->hash(), remove });
+    }
+
+    return max_removed;
+
+}
+
+transaction_pool::priority transaction_pool::demote(
+    std::deque<transaction_entry::ptr>& queue,
+    const std::map<hash_digest, bool>& bounds)
+{
+    priority max_removed = 0.0;
+    std::map<hash_digest, bool> pending_removal;
+
+    // for each entry,
+    while (!queue.empty())
+    {
+        auto element = queue.back();
+        queue.pop_back();
+
+        // skip repeated elements
+        if (pending_removal.find(element->hash()) == pending_removal.end())
+            continue;
+
+        auto& children = element->children().left;
+        std::list<uint32_t> indicies;
+        bool remove = true;
+
+        // add children to list
+        for (auto entry = children.begin(); entry != children.end(); ++entry)
+        {
+            if ((bounds.find(entry->second->hash()) != bounds.end()))
+            {
+                indicies.push_back(entry->first);
+                queue.push_back(entry->second);
+            }
+            else
+                remove = false;
+        }
+
+        auto& parents = element->parents();
+
+        // sever parent connections, enqueue child-less anchor parents
+        for (auto& entry : parents)
+        {
+            entry->remove_child(element);
+            if (entry->is_anchor() && entry->children().size() == 0)
+                queue.push_back(entry);
+        }
+
+        // remove children examined from entry
+        for (auto i : indicies)
+            element->remove_child(i);
+
+        if (remove)
+        {
+            // remove entry from pool and template
+            auto pool_member = pool_.left.find(element);
+            if (pool_member != pool_.left.end())
+                pool_.left.erase(pool_member);
+
+            auto template_member = template_.left.find(element);
+            if (template_member != template_.left.end())
+            {
+                if (max_removed < template_member->second)
+                    max_removed = template_member->second;
+
+                template_bytes_ -= template_member->first->size();
+                template_sigops_ -= template_member->first->sigops();
+                template_.erase(prioritized_transactions::value_type(
+                    template_member->first, template_member->second));
+            }
+        }
+
+        // indicate completion with element
+        pending_removal.insert({ element->hash(), remove });
+    }
+
+    return max_removed;
+}
+
+transaction_pool::priority transaction_pool::calculate_priority(
+    transaction_entry::ptr tx)
+{
+    uint64_t cumulative_fees = 0;
+    size_t cumulative_size = 0;
+    std::deque<transaction_entry::ptr> queue;
+    std::map<hash_digest, bool> encountered;
+
+    // initialize list of entries to be walked with tx
+    queue.push_back(tx);
+
+    // for each entry,
+    while (!queue.empty())
+    {
+        auto element = queue.back();
+        queue.pop_back();
+        encountered.insert({ element->hash(), true });
+
+        if (encountered.find(element->hash()) == encountered.end())
+            continue;
+
+        // add all parents
+        for (auto parent : element->parents())
+            if (encountered.find(parent->hash()) != encountered.end())
+                queue.push_back(parent);
+
+        // increment cumulative sums
+        cumulative_fees += element->fees();
+        cumulative_size += element->size();
+    }
+
+    // return ratio of size to rate
+    return (cumulative_size > 0) ? cumulative_fees / cumulative_size :
+        std::numeric_limits<transaction_pool::priority>::max();
+}
+
+transaction_pool::prioritized_transactions::right_map::iterator
+transaction_pool::find_inflection(prioritized_transactions& container,
+    transaction_pool::priority value)
+{
+    prioritized_transactions::right_map::iterator changepoint =
+        container.right.begin();
+
+    for (auto it = container.right.begin(); it != container.right.end(); ++it)
+    {
+        if (it->first <= value)
+        {
+            changepoint = it;
+            break;
+        }
+    }
+
+    return changepoint;
+}
+
+struct plus_sigops
+{
+    size_t operator()(size_t lhs, const transaction_entry::ptr& rhs) const
+    {
+        return rhs ? lhs + rhs->sigops() : lhs;
+    }
+};
+
+struct plus_size
+{
+    size_t operator()(size_t lhs, const transaction_entry::ptr& rhs) const
+    {
+        return rhs ? lhs + rhs->size() : lhs;
+    }
+};
+
+void transaction_pool::update_template(
+    prioritized_transactions::right_map::iterator max_pool_change)
+{
+    // as max_changepoint may not be a value within the template,
+    // walk the template entries until changepoint or a value less than it is
+    // discovered
+    auto template_point = find_inflection(template_, max_pool_change->first);
+
+    // for each element in the template below this point, purge if
+    // not depended upon by an entry of higher priority
+    // alternately: scan closure of children for references in the template
+    // above this prioritization value
+    transaction_entry::list to_remove;
+    for (auto entry = template_point; entry != template_.right.end(); ++entry)
+    {
+        bool purge = true;
+        auto closure_element = template_child_closure_.find(entry->second);
+
+        if (closure_element != template_child_closure_.end());
+        {
+            for (auto child : closure_element->second)
+            {
+                auto child_in_template = template_.left.find(child);
+                if ((child_in_template != template_.left.end()) &&
+                    (child_in_template->second > max_pool_change->first))
+                {
+                    purge = false;
+                    break;
+                }
+            }
+        }
+
+        if (purge)
+            to_remove.push_back(closure_element->first);
+    }
+
+    auto pool_point = max_pool_change;
+
+    // for each element after the inflection point,
+    for (auto it = pool_point; it != pool_.right.end(); ++it)
+    {
+        // if within template, skip
+        if (template_.left.find(it->second) != template_.left.end())
+            continue;
+
+        // if outside template, test addition against sigops/size limits
+        auto proposed_entries = get_parent_closure(it->second);
+        size_t cumulative_sigops = std::accumulate(proposed_entries.begin(),
+            proposed_entries.end(), 0, plus_sigops());
+        size_t cumulative_bytes = std::accumulate(proposed_entries.begin(),
+            proposed_entries.end(), 0, plus_size());
+
+        if ((cumulative_sigops + template_sigops_ + coinbase_sigop_reserve_ <=
+            template_sigop_limit_) && (cumulative_bytes + template_bytes_ +
+            coinbase_byte_reserve_ <= template_byte_limit_))
+        {
+            template_bytes_ += cumulative_bytes;
+            template_sigops_ += cumulative_sigops;
+
+            for (auto entry : proposed_entries)
+            {
+                auto pool_entry = pool_.left.find(entry);
+                template_.insert({ pool_entry->first, pool_entry->second });
+
+                // calculate closure over children for fast filtering on
+                // subsequent update
+                populate_child_closure(pool_entry->first);
+            }
+        }
+    }
+
+    // Regenerate ordered template
+    order_template_transactions();
+
+    // NOTE: detection of change requires memory of purged and added sets
+    // for difference computation.  Not currently implemented.
+}
+
+void transaction_pool::order_template_transactions()
+{
+    std::deque<transaction_entry::ptr> queue;
+    std::map<hash_digest, bool> encountered;
+    ordered_template_.clear();
+
+    for (auto entry : template_.left)
+        queue.push_back(entry.first);
+
+    while (!queue.empty())
+    {
+        auto element = queue.back();
+        queue.pop_back();
+
+        if (encountered.find(element->hash()) != encountered.end())
+            continue;
+
+        transaction_entry::list required;
+        for (auto& parent : element->parents())
+            if (!parent->is_anchor() &&
+                (encountered.find(parent->hash()) != encountered.end()))
+                required.push_back(parent);
+
+        if (required.size() > 0)
+        {
+            queue.push_back(element);
+            for (auto entry : required)
+                queue.push_back(entry);
+        }
+        else
+            ordered_template_.push_back(element);
+    }
+}
+
+void transaction_pool::populate_child_closure(transaction_entry::ptr tx)
+{
+    transaction_entry::list closure;
+    std::map<hash_digest, bool> encountered;
+    std::deque<transaction_entry::ptr> stack;
+    auto children = tx->children();
+
+    for (auto it = children.left.begin(); it != children.left.end(); ++it)
+        stack.push_back(it->second);
+
+    while (!stack.empty())
+    {
+        auto element = stack.back();
+        stack.pop_back();
+
+        if (encountered.find(element->hash()) != encountered.end())
+            continue;
+
+        encountered.insert({ element->hash(), true });
+
+        auto closure_point = template_child_closure_.find(element);
+        if (closure_point != template_child_closure_.end())
+        {
+            // short circut exploration by using the existing closure for
+            // this child node
+            for (auto it : closure_point->second)
+            {
+                if (encountered.find(it->hash()) == encountered.end())
+                {
+                    encountered.insert({ it->hash(), true });
+                    closure.push_back(it);
+                }
+            }
+        }
+        else
+        {
+            // enqueue children
+            auto& child_left = element->children().left;
+            for (auto it = child_left.begin(); it != child_left.end(); ++it)
+                stack.push_back(it->second);
+        }
+
+        closure.push_back(element);
+    }
+
+    template_child_closure_.insert({ tx, closure });
+}
+
+transaction_entry::list transaction_pool::get_parent_closure(
+    transaction_entry::ptr tx)
+{
+    std::map<hash_digest, transaction_entry::ptr> encountered;
+    std::deque<transaction_entry::ptr> queue;
+    queue.push_back(tx);
+
+    while (!queue.empty())
+    {
+        auto element = queue.back();
+        queue.pop_back();
+
+        if (encountered.find(element->hash()) != encountered.end())
+            continue;
+
+        encountered.insert({ element->hash(), element });
+
+        // add all parents
+        for (auto parent : element->parents())
+            if (encountered.find(parent->hash()) != encountered.end())
+                queue.push_back(parent);
+    }
+
+    transaction_entry::list result;
+    for (auto it = encountered.begin(); it != encountered.end(); ++it)
+        result.push_back(it->second);
+
+    return result;
 }
 
 } // namespace blockchain

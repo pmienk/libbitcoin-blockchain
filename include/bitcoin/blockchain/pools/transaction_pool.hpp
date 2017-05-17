@@ -21,10 +21,14 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <boost/bimap.hpp>
+#include <boost/bimap/multiset_of.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
 #include <bitcoin/bitcoin.hpp>
 #include <bitcoin/blockchain/define.hpp>
 #include <bitcoin/blockchain/interface/safe_chain.hpp>
 #include <bitcoin/blockchain/settings.hpp>
+#include <bitcoin/blockchain/pools/transaction_entry.hpp>
 
 namespace libbitcoin {
 namespace blockchain {
@@ -35,15 +39,67 @@ class BCB_API transaction_pool
 public:
     typedef safe_chain::inventory_fetch_handler inventory_fetch_handler;
     typedef safe_chain::merkle_block_fetch_handler merkle_block_fetch_handler;
+    typedef double priority;
 
     transaction_pool(const settings& settings);
 
-    void fetch_template(merkle_block_fetch_handler) const;
     void fetch_mempool(size_t maximum, inventory_fetch_handler) const;
+    void fetch_template(merkle_block_fetch_handler) const;
 
-////private:
-////    const bool reject_conflicts_;
-////    const uint64_t minimum_fee_;
+    transaction_entry::list get_mempool() const;
+    transaction_entry::list get_template() const;
+
+    void add_unconfirmed_transactions(
+        const transaction_const_ptr_list& unconfirmed_txs);
+
+    void remove_transactions(transaction_const_ptr_list& txs);
+
+private:
+    // TODO: replace with multi_indexed_container tracking dependency ordering
+    // for mempool/template emission efficiency
+
+    // A bidirection map is used for efficient output and position retrieval.
+    // This produces the effect of a prioritized buffer tx hash table of outputs.
+    typedef boost::bimaps::bimap<
+        boost::bimaps::unordered_set_of<transaction_entry::ptr,
+            boost::hash<boost::bimaps::tags::support::value_type_of<
+                transaction_entry::ptr>::type>,
+            transaction_entry::ptr_equal>,
+        boost::bimaps::multiset_of<priority>> prioritized_transactions;
+
+    priority calculate_priority(transaction_entry::ptr tx);
+
+    priority demote(
+        std::deque<transaction_entry::ptr>& queue,
+        const std::map<hash_digest, bool>& bounds);
+
+    prioritized_transactions::right_map::iterator find_inflection(
+        prioritized_transactions& container,
+        transaction_pool::priority value);
+
+    transaction_entry::list get_parent_closure(transaction_entry::ptr tx);
+
+    void populate_child_closure(transaction_entry::ptr tx);
+
+    priority remove_spend_conflicts(std::deque<transaction_entry::ptr>& queue);
+
+    void order_template_transactions();
+
+    void update_template(
+        prioritized_transactions::right_map::iterator max_pool_change);
+
+private:
+    prioritized_transactions pool_;
+    prioritized_transactions template_;
+    std::map<transaction_entry::ptr, transaction_entry::list> template_child_closure_;
+    transaction_entry::list ordered_template_;
+    size_t template_bytes_;
+    size_t template_sigops_;
+
+    size_t template_byte_limit_;
+    size_t template_sigop_limit_;
+    size_t coinbase_byte_reserve_;
+    size_t coinbase_sigop_reserve_;
 };
 
 } // namespace blockchain

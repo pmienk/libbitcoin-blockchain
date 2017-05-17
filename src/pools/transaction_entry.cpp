@@ -41,8 +41,7 @@ transaction_entry::transaction_entry(transaction_const_ptr tx)
    sigops_(cap(tx->signature_operations())),
    fees_(tx->fees()),
    forks_(tx->validation.state->enabled_forks()),
-   hash_(tx->hash()),
-   marked_(false)
+   hash_(tx->hash())
 {
 }
 
@@ -52,8 +51,7 @@ transaction_entry::transaction_entry(const hash_digest& hash)
    sigops_(0),
    fees_(0),
    forks_(0),
-   hash_(hash),
-   marked_(false)
+   hash_(hash)
 {
 }
 
@@ -92,16 +90,6 @@ const hash_digest& transaction_entry::hash() const
     return hash_;
 }
 
-void transaction_entry::mark(bool value)
-{
-    marked_ = value;
-}
-
-bool transaction_entry::is_marked() const
-{
-    return marked_;
-}
-
 // Not valid if the entry is a search key.
 const transaction_entry::list& transaction_entry::parents() const
 {
@@ -109,7 +97,7 @@ const transaction_entry::list& transaction_entry::parents() const
 }
 
 // Not valid if the entry is a search key.
-const transaction_entry::list& transaction_entry::children() const
+const transaction_entry::indexed_list& transaction_entry::children() const
 {
     return children_;
 }
@@ -120,21 +108,69 @@ void transaction_entry::add_parent(ptr parent)
     parents_.push_back(parent);
 }
 
-// This is not guarded against redundant entries.
-void transaction_entry::add_child(ptr child)
+void transaction_entry::remove_parent(const hash_digest& parent,
+    bool all_instances)
 {
-    children_.push_back(child);
+    for (auto it = parents_.begin(); it != parents_.end();)
+    {
+        if ((*it)->hash() == parent)
+        {
+            it = parents_.erase(it);
+            if (!all_instances)
+                break;
+        }
+        else
+            ++it;
+    }
+}
+
+void transaction_entry::add_child(uint32_t index, ptr child)
+{
+    children_.insert({ index, child });
+}
+
+// This is guarded against missing entries.
+void transaction_entry::remove_child(uint32_t index)
+{
+    const auto it = children_.left.find(index);
+
+    if (it != children_.left.end())
+    {
+        auto& self = hash();
+        it->second->remove_parent(self, false);
+        children_.erase(indexed_list::value_type(it->first, it->second));
+    }
 }
 
 // This is guarded against missing entries.
 void transaction_entry::remove_child(ptr child)
 {
-    const auto it = find(children_.begin(), children_.end(), child);
+    const auto it = children_.right.find(child);
 
-    // TODO: this is a placeholder for subtree purge.
-    // TODO: manage removal of bidirectional link add/remove.
-    if (it != children_.end())
-        children_.erase(it);
+    if (it != children_.right.end())
+    {
+        auto& self = hash();
+        it->first->remove_parent(self, true);
+        children_.erase(indexed_list::value_type(it->second, it->first));
+    }
+}
+
+void transaction_entry::remove_children()
+{
+    auto& self = hash();
+    for (auto it = children_.left.begin(); it != children_.left.end(); ++it)
+        it->second->remove_parent(self, true);
+
+    children_.clear();
+}
+
+std::size_t hash_value(const transaction_entry::ptr& instance)
+{
+    if (!instance)
+        return 0;
+
+    boost::hash<hash_digest> hasher;
+    return hasher(instance->hash());
 }
 
 std::ostream& operator<<(std::ostream& out, const transaction_entry& of)
@@ -143,6 +179,38 @@ std::ostream& operator<<(std::ostream& out, const transaction_entry& of)
         << " " << of.parents_.size()
         << " " << of.children_.size();
     return out;
+}
+
+// For the purpose of bimap identity only the tx hash matters.
+bool transaction_entry::operator==(const transaction_entry& other) const
+{
+    return hash_ == other.hash_;
+}
+
+bool transaction_entry::ptr_less::operator()(const transaction_entry::ptr& lhs,
+    const transaction_entry::ptr& rhs) const
+{
+    if (lhs && rhs)
+        return (*lhs).hash() < (*rhs).hash();
+    else if (!lhs && rhs)
+        return true;
+    else if (lhs && !rhs)
+        return false;
+    else
+        return false;
+}
+
+bool transaction_entry::ptr_equal::operator()(const transaction_entry::ptr& lhs,
+    const transaction_entry::ptr& rhs) const
+{
+    if (lhs && rhs)
+        return (*lhs) == (*rhs);
+    else if (!lhs && rhs)
+        return false;
+    else if (lhs && !rhs)
+        return false;
+    else
+        return true;
 }
 
 } // namespace blockchain
